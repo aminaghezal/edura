@@ -1,0 +1,66 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+
+const schema = z.object({
+  authId: z.string(),
+  schoolName: z.string().min(2).max(200),
+  wilaya: z.string().min(2),
+  directorName: z.string().min(2),
+  email: z.string().email(),
+});
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  const parsed = schema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { authId, schoolName, wilaya, directorName, email } = parsed.data;
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const school = await tx.school.create({
+        data: {
+          name: schoolName,
+          wilaya,
+          director: directorName,
+          email,
+          trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      const user = await tx.user.create({
+        data: {
+          schoolId: school.id,
+          authId,
+          email,
+          name: directorName,
+          role: "DIRECTOR",
+        },
+      });
+
+      // Seed: current academic year
+      const now = new Date();
+      const yearLabel = `${now.getFullYear()}-${now.getFullYear() + 1}`;
+      await tx.academicYear.create({
+        data: {
+          schoolId: school.id,
+          name: yearLabel,
+          startDate: new Date(now.getFullYear(), 8, 1),
+          endDate: new Date(now.getFullYear() + 1, 5, 30),
+          isCurrent: true,
+        },
+      });
+
+      return { school, user };
+    });
+
+    return NextResponse.json(result);
+  } catch (err) {
+    console.error("setup-school failed:", err);
+    return NextResponse.json({ error: "Setup failed" }, { status: 500 });
+  }
+}

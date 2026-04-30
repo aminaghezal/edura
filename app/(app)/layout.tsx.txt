@@ -1,0 +1,17 @@
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
+import { AppSidebar } from "@/components/edura/app-sidebar";
+import { AppTopbar } from "@/components/edura/app-topbar";
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+ const session = await getSession();
+ if (!session) redirect("/login");
+ return (
+ <div className="min-h-screen bg-muted/20">
+ <AppTopbar session={session} />
+ <div className="flex">
+ <AppSidebar role={session.role} />
+ <main className="flex-1 p-6">{children}</main>
+ </div>
+ </div>
+ );
+}
