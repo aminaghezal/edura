@@ -116,7 +116,7 @@ export default async function DashboardPage() {
     { name: "Risque faible", value: lowRiskCount, color: "#10b981" },
     { name: "Risque modéré", value: moderateRiskCount, color: "#f59e0b" },
     { name: "Risque élevé", value: highRiskCount, color: "#ef4444" },
-  ];
+  ].filter((r) => r.value > 0);
 
   return (
     <div className="p-8 space-y-6">

@@ -18,11 +18,16 @@ type Props = {
 };
 
 const accents: Record<NonNullable<Props["accent"]>, string> = {
-  primary: "from-indigo-500/10 to-indigo-500/5 text-indigo-700",
-  emerald: "from-emerald-500/10 to-emerald-500/5 text-emerald-700",
-  amber: "from-amber-500/10 to-amber-500/5 text-amber-700",
-  red: "from-red-500/10 to-red-500/5 text-red-700",
-  indigo: "from-indigo-500/10 to-indigo-500/5 text-indigo-700",
+  primary:
+    "from-indigo-500/10 to-indigo-500/5 text-indigo-700 dark:from-indigo-400/15 dark:to-indigo-400/5 dark:text-indigo-300",
+  emerald:
+    "from-emerald-500/10 to-emerald-500/5 text-emerald-700 dark:from-emerald-400/20 dark:to-emerald-400/5 dark:text-emerald-300",
+  amber:
+    "from-amber-500/10 to-amber-500/5 text-amber-700 dark:from-amber-400/15 dark:to-amber-400/5 dark:text-amber-300",
+  red:
+    "from-red-500/10 to-red-500/5 text-red-700 dark:from-red-400/20 dark:to-red-400/5 dark:text-red-300",
+  indigo:
+    "from-indigo-500/10 to-indigo-500/5 text-indigo-700 dark:from-indigo-400/15 dark:to-indigo-400/5 dark:text-indigo-300",
 };
 
 export function MetricCard({
@@ -41,7 +46,7 @@ export function MetricCard({
   const isFlat = delta != null && delta === 0;
 
   return (
-    <Card className="relative overflow-hidden border-border/60 hover:border-primary/40 transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 animate-in fade-in slide-in-from-bottom-2">
+    <Card className="relative overflow-hidden border-border/60 hover:border-primary/40 transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 animate-in fade-in slide-in-from-bottom-2 dark:hover:shadow-[0_0_24px_-8px_rgba(167,139,250,0.4)]">
       {/* Subtle gradient glow */}
       <div
         className={`absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none ${accents[accent]}`}
