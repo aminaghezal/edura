@@ -89,11 +89,14 @@ export function GradesClient({
 
   return (
     <div className="p-8">
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-end justify-between mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
         <div>
-          <h1 className="text-2xl font-bold">Saisie des notes</h1>
+          <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+            Évaluation
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Saisie des notes</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Trimestre {trimester} — Année {year || "—"}
+            Trimestre {trimester} — Année {year || "—"} • Sauvegarde automatique
           </p>
         </div>
       </div>

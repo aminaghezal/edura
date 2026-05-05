@@ -125,11 +125,14 @@ export function StudentsClient({
     <div className="flex gap-6 h-full p-8">
       {/* Main list */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-end justify-between mb-6">
+        <div className="flex items-end justify-between mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
           <div>
-            <h1 className="text-2xl font-bold">Élèves</h1>
+            <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+              Gestion académique
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Élèves</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {students.length} élève{students.length !== 1 ? "s" : ""} inscrit{students.length !== 1 ? "s" : ""}
+              {students.length} élève{students.length !== 1 ? "s" : ""} inscrit{students.length !== 1 ? "s" : ""} — année 2025/2026
             </p>
           </div>
           <div className="flex gap-2">

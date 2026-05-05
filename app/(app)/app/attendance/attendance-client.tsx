@@ -95,10 +95,13 @@ export function AttendanceClient({
 
   return (
     <div className="p-8">
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-end justify-between mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
         <div>
-          <h1 className="text-2xl font-bold">Présences du jour</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+            Suivi quotidien
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Présences du jour</h1>
+          <p className="text-sm text-muted-foreground mt-1 capitalize">
             {new Date(todayISO).toLocaleDateString("fr-FR", {
               weekday: "long",
               day: "numeric",
