@@ -30,8 +30,13 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Redirect logged-in users away from auth pages
-  if ((req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/signup") && user) {
+  // Redirect logged-in users away from auth pages and landing
+  if (
+    (req.nextUrl.pathname === "/login" ||
+      req.nextUrl.pathname === "/signup" ||
+      req.nextUrl.pathname === "/") &&
+    user
+  ) {
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
@@ -39,5 +44,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/login", "/signup"],
+  matcher: ["/", "/app/:path*", "/login", "/signup"],
 };

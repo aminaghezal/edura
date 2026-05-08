@@ -33,6 +33,9 @@ model School {
  payments Payment[]
  announcements Announcement[]
  auditLogs AuditLog[]
+ complianceCategories ComplianceCategory[]
+ obligations Obligation[]
+ complianceAuditLogs ComplianceAuditLog[]
  @@index([wilaya])
  @@map("schools")
 }
@@ -333,3 +336,79 @@ model AuditLog {
  @@index([schoolId, createdAt])
  @@map("audit_logs")
 }
+// ============================================================
+// COMPLIANCE INTELLIGENCE MODULE
+// ============================================================
+
+model ComplianceCategory {
+  id          String       @id @default(cuid())
+  schoolId    String
+  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  code        String
+  title       String
+  description String
+  weight      Int
+  legalRef    String
+  obligations Obligation[]
+  createdAt   DateTime     @default(now())
+
+  @@index([schoolId])
+  @@map("compliance_categories")
+}
+
+model Obligation {
+  id            String             @id @default(cuid())
+  categoryId    String
+  category      ComplianceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  schoolId      String
+  school        School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  status        ObligationStatus   @default(NOT_STARTED)
+  documentUrl   String?
+  documentName  String?
+  expiresAt     DateTime?
+  lastUpdatedBy String?
+  lastUpdatedAt DateTime           @default(now())
+  notes         String?
+
+  @@index([schoolId, status])
+  @@index([categoryId])
+  @@map("obligations")
+}
+
+enum ObligationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLIANT
+  EXPIRED
+  AT_RISK
+}
+
+model ComplianceAuditLog {
+  id           String   @id @default(cuid())
+  schoolId     String
+  school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  obligationId String?
+  action       String
+  performedBy  String
+  details      String
+  createdAt    DateTime @default(now())
+
+  @@index([schoolId, createdAt])
+  @@map("compliance_audit_logs")
+}
+
+model RegulatoryNews {
+  id          String   @id @default(cuid())
+  title       String
+  summary     String
+  source      String
+  url         String?
+  publishedAt DateTime
+  severity    String
+  createdAt   DateTime @default(now())
+
+  @@map("regulatory_news")
+}
+

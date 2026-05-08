@@ -172,3 +172,92 @@
     @apply font-sans;
   }
 }
+
+/* ============================================================
+   MARKETING / LANDING PAGE — "Minimalist Modern" design system
+   Scoped to .marketing-root so it doesn't fight the app's theme
+   ============================================================ */
+
+.marketing-root {
+  --m-accent: #0052ff;
+  --m-accent-2: #4d7cff;
+  --m-fg: #0f172a;
+  --m-bg: #fafafa;
+  --m-muted: #f1f5f9;
+  --m-muted-fg: #64748b;
+  --m-border: #e2e8f0;
+
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--m-bg);
+  color: var(--m-fg);
+}
+
+.marketing-root .font-display {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.marketing-root .font-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+.marketing-root .gradient-text {
+  background: linear-gradient(to right, #0052ff, #4d7cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.marketing-root .gradient-bg {
+  background: linear-gradient(to right, #0052ff, #4d7cff);
+}
+
+.marketing-root .gradient-bg-diag {
+  background: linear-gradient(135deg, #0052ff, #4d7cff);
+}
+
+/* Subtle dot pattern for inverted dark sections */
+.marketing-root .dot-pattern {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Accent-tinted shadow for buttons / featured elements */
+.marketing-root .shadow-accent-sm {
+  box-shadow: 0 4px 14px rgba(0, 82, 255, 0.25);
+}
+.marketing-root .shadow-accent-lg {
+  box-shadow: 0 10px 30px rgba(0, 82, 255, 0.35);
+}
+
+/* Continuous animations */
+@keyframes m-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes m-float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes m-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes m-pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+
+.marketing-root .anim-float { animation: m-float 5s ease-in-out infinite; }
+.marketing-root .anim-float-slow { animation: m-float-slow 4s ease-in-out infinite; }
+.marketing-root .anim-spin-slow { animation: m-spin-slow 60s linear infinite; }
+.marketing-root .anim-pulse-dot { animation: m-pulse-dot 2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-root .anim-float,
+  .marketing-root .anim-float-slow,
+  .marketing-root .anim-spin-slow,
+  .marketing-root .anim-pulse-dot {
+    animation: none;
+  }
+}
