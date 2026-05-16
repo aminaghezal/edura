@@ -64,6 +64,8 @@ model User {
  taughtClasses TeacherAssignment[]
  enteredGrades Grade[]
  recordedAttendance Attendance[]
+ observations StudentObservation[]
+ generatedReports OrientationReport[]
  @@index([schoolId])
  @@index([role])
  @@map("users")
@@ -123,6 +125,7 @@ model Subject {
  teacherAssignments TeacherAssignment[]
  grades Grade[]
  schedules Schedule[]
+ observations StudentObservation[]
  @@unique([schoolId, code])
  @@index([schoolId])
  @@map("subjects")
@@ -177,11 +180,20 @@ model Student {
  riskRationale String? // Human-readable reason
  orientationSuggestion String?
  orientationConfidence Float?
+ // ── Scientific Report inputs (manual entry) ──
+ iqScore Int? // 70-160, standard IQ test
+ iqTestName String? // "WISC-V", "Stanford-Binet", "Raven", etc.
+ iqTestDate DateTime?
+ hobbies String? // comma-separated: "lecture,échecs,football"
+ interests String? // comma-separated: "sciences,art,technologie"
+ learningStyle LearningStyle?
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
  grades Grade[]
  attendance Attendance[]
  payments Payment[]
+ observations StudentObservation[]
+ orientationReports OrientationReport[]
  @@index([schoolId, classId])
  @@index([riskLevel])
  @@map("students")
@@ -412,3 +424,61 @@ model RegulatoryNews {
   @@map("regulatory_news")
 }
 
+
+// ============================================================
+// SCIENTIFIC REPORT MODULE — Multiple Intelligences + Orientation
+// ============================================================
+
+enum LearningStyle {
+  VISUAL          // apprend en voyant
+  AUDITORY        // apprend en écoutant
+  KINESTHETIC     // apprend en faisant
+  READING_WRITING // apprend en lisant/écrivant
+  MIXED           // mixte (cas le plus fréquent)
+}
+
+model StudentObservation {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schoolId        String
+  // Optional: scope observation to a subject (e.g., teacher of Maths)
+  subjectId       String?
+  subject         Subject? @relation(fields: [subjectId], references: [id])
+  // Author teacher
+  teacherId       String
+  teacher         User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  observation     String
+  // Tags helping the AI build the intelligence profile.
+  // Stored as comma-separated codes: "LINGUISTIC,INTERPERSONAL"
+  intelligenceTags String?
+  // What this teacher recommends
+  advice          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([schoolId])
+  @@map("student_observations")
+}
+
+model OrientationReport {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schoolId    String
+  generatedById String
+  generatedBy User     @relation(fields: [generatedById], references: [id])
+  // Snapshot of the computed report as JSON — so historical reports
+  // remain stable even if grades/observations change later.
+  // Schema: { intelligences, learningStyle, interests, gpaTrend,
+  //          recommendedFilieres, careerSuggestions, advices, etc. }
+  data        String   // JSON string
+  trimester   Int?
+  year        String?
+  createdAt   DateTime @default(now())
+
+  @@index([studentId])
+  @@index([schoolId, createdAt])
+  @@map("orientation_reports")
+}

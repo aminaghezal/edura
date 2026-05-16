@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, X, FileText, MessageSquare, Upload, Download } from "lucide-react";
+import { Search, Plus, X, FileText, MessageSquare, Upload, Download, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -416,13 +416,21 @@ export function StudentsClient({
                 <Row label="Téléphone" value={selected.parentPhone ?? "—"} />
               </div>
 
-              <div className="flex gap-2 mt-6">
-                <Button variant="secondary" size="sm" className="flex-1">
-                  <FileText className="w-4 h-4 mr-2" /> Bulletin
+              <div className="flex flex-col gap-2 mt-6">
+                <Button size="sm" asChild className="w-full">
+                  <a href={`/app/students/${selected.id}/report`}>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Rapport Scientifique
+                  </a>
                 </Button>
-                <Button variant="secondary" size="sm" className="flex-1">
-                  <MessageSquare className="w-4 h-4 mr-2" /> Message
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="secondary" size="sm" className="flex-1">
+                    <FileText className="w-4 h-4 mr-2" /> Bulletin
+                  </Button>
+                  <Button variant="secondary" size="sm" className="flex-1">
+                    <MessageSquare className="w-4 h-4 mr-2" /> Message
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
