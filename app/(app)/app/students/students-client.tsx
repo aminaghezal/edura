@@ -346,6 +346,7 @@ export function StudentsClient({
                   <TableHead>Classe</TableHead>
                   <TableHead>Risque</TableHead>
                   <TableHead>Parent</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -368,6 +369,19 @@ export function StudentsClient({
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {s.parentName ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="h-7 px-2 text-xs"
+                        >
+                          <a href={`/app/students/${s.id}/report`}>
+                            <Sparkles className="w-3 h-3 mr-1" />
+                            Rapport
+                          </a>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );

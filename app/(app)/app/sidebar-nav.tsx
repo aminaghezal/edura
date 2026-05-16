@@ -12,6 +12,7 @@ import {
   Banknote,
   Brain,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 
@@ -36,6 +37,7 @@ const NAV: NavItem[] = [
     roles: ["DIRECTOR", "SECRETARY"],
   },
   { href: "/app/insights", label: "Analyses IA", icon: <Brain className="w-4 h-4" /> },
+  { href: "/app/reports", label: "Rapports Scientifiques", icon: <Sparkles className="w-4 h-4" /> },
   {
     href: "/app/settings",
     label: "Paramètres",

@@ -400,6 +400,31 @@ export default async function DashboardPage() {
             </Card>
           )}
 
+          {/* ── Quick access: Scientific Reports ── */}
+          <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/30">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white grid place-items-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Rapports Scientifiques d&apos;Orientation</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Bilan pédagogique complet par élève — intelligences multiples, prédiction d&apos;orientation, métiers
+                    </p>
+                  </div>
+                </div>
+                <Button asChild>
+                  <Link href="/app/reports">
+                    Explorer
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* ── Reset demo ── */}
           <Card className="border-dashed">
             <CardContent className="p-4">

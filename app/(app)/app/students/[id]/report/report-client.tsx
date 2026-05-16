@@ -13,7 +13,9 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -135,6 +137,20 @@ export function ReportClient({
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground print:hidden">
+        <Link href="/app/reports" className="hover:text-foreground transition-colors flex items-center gap-1">
+          <ArrowLeft className="w-3 h-3" />
+          Tous les rapports
+        </Link>
+        <span>/</span>
+        <Link href="/app/students" className="hover:text-foreground transition-colors">
+          Élèves
+        </Link>
+        <span>/</span>
+        <span className="text-foreground font-medium">{report.meta.studentName}</span>
+      </div>
+
       {/* Header — print-friendly */}
       <div className="flex items-end justify-between flex-wrap gap-3 animate-in fade-in slide-in-from-top-2 duration-500 print:hidden">
         <div>
