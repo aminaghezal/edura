@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useTheme } from "./theme-provider";
 import {
   Search,
@@ -25,23 +26,110 @@ import {
 export function TopBar({ userName }: { userName: string }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const router = useRouter();
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Cmd+K shortcut to focus search
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Quick navigation map — search routes by keyword
+  const ROUTES: { keywords: string[]; path: string; label: string }[] = [
+    { keywords: ["dashboard", "tableau", "accueil", "home"], path: "/app", label: "Tableau de bord" },
+    { keywords: ["élève", "eleve", "etudiant", "student"], path: "/app/students", label: "Élèves" },
+    { keywords: ["note", "saisie", "grade", "moyenne"], path: "/app/grades", label: "Notes" },
+    { keywords: ["bulletin", "rapport scolaire"], path: "/app/bulletins", label: "Bulletins" },
+    { keywords: ["présence", "presence", "absence", "attendance"], path: "/app/attendance", label: "Présences" },
+    { keywords: ["emploi", "temps", "schedule", "edt"], path: "/app/schedule", label: "Emploi du temps" },
+    { keywords: ["finance", "paiement", "argent", "facture"], path: "/app/finance", label: "Finance" },
+    { keywords: ["ia", "ai", "risque", "insight", "intelligence"], path: "/app/insights", label: "Analyses IA" },
+    { keywords: ["rapport scientifique", "orientation", "gardner"], path: "/app/reports", label: "Rapports Scientifiques" },
+    { keywords: ["paramètre", "parametre", "setting", "config"], path: "/app/settings", label: "Paramètres" },
+    { keywords: ["équipe", "equipe", "team", "professeur"], path: "/app/settings/team", label: "Équipe" },
+    { keywords: ["aide", "help", "faq", "support"], path: "/app/help", label: "Aide" },
+  ];
+
+  const searchMatches = searchQuery.trim()
+    ? ROUTES.filter((r) =>
+        r.keywords.some((k) => k.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        r.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      ).slice(0, 6)
+    : [];
+
+  function navigateTo(path: string) {
+    setSearchQuery("");
+    setSearchOpen(false);
+    router.push(path);
+  }
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-md">
-      <div className="flex items-center gap-3 px-6 py-3">
-        {/* Search bar */}
-        <div className="flex items-center gap-2 flex-1 max-w-md">
+      <div className="flex items-center gap-3 px-3 sm:px-6 py-3 pl-14 lg:pl-6">
+        {/* Search bar with live results */}
+        <div className="flex items-center gap-2 flex-1 max-w-md relative">
           <div className="relative flex-1 group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
+              ref={searchRef}
               type="text"
-              placeholder="Rechercher un élève, classe, paiement..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && searchMatches[0]) {
+                  navigateTo(searchMatches[0].path);
+                } else if (e.key === "Escape") {
+                  setSearchQuery("");
+                  setSearchOpen(false);
+                  searchRef.current?.blur();
+                }
+              }}
+              placeholder="Rechercher une page (élèves, notes, finance...)"
               className="w-full h-9 pl-9 pr-16 rounded-md border border-input bg-muted/40 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-colors"
             />
             <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono text-muted-foreground bg-muted border border-border">
               <Command className="w-2.5 h-2.5" />K
             </kbd>
           </div>
+
+          {/* Dropdown results */}
+          {searchOpen && searchQuery.trim() && (
+            <div className="absolute left-0 right-0 top-full mt-1 rounded-md border bg-popover shadow-lg z-50 max-h-80 overflow-auto">
+              {searchMatches.length === 0 ? (
+                <div className="p-3 text-xs text-muted-foreground text-center">
+                  Aucun résultat
+                </div>
+              ) : (
+                searchMatches.map((m) => (
+                  <button
+                    key={m.path}
+                    onMouseDown={() => navigateTo(m.path)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted text-left"
+                  >
+                    <Search className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span>{m.label}</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground font-mono">
+                      {m.path}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* System status indicators */}
@@ -137,25 +225,29 @@ export function TopBar({ userName }: { userName: string }) {
             </a>
           </Button>
 
-          {/* Help */}
-          <Button variant="ghost" size="icon" className="h-9 w-9 hidden md:inline-flex">
-            <HelpCircle className="w-4 h-4" />
+          {/* Help — linked to /app/help */}
+          <Button variant="ghost" size="icon" className="h-9 w-9 hidden md:inline-flex" asChild>
+            <a href="/app/help" aria-label="Aide">
+              <HelpCircle className="w-4 h-4" />
+            </a>
           </Button>
 
-          {/* User avatar */}
-          <div className="ml-2 pl-3 border-l">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-primary-foreground text-xs font-bold shadow-sm">
-                {userName[0]?.toUpperCase()}
-              </div>
-              <div className="hidden md:block leading-tight">
-                <div className="text-xs font-semibold truncate max-w-[120px]">
-                  {userName}
-                </div>
-                <div className="text-[10px] text-muted-foreground">En ligne</div>
-              </div>
+          {/* User avatar — clickable, links to settings */}
+          <a
+            href="/app/settings"
+            className="ml-2 pl-3 border-l flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity"
+            aria-label="Mon profil"
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-primary-foreground text-xs font-bold shadow-sm group-hover:scale-105 transition-transform">
+              {userName[0]?.toUpperCase()}
             </div>
-          </div>
+            <div className="hidden md:block leading-tight">
+              <div className="text-xs font-semibold truncate max-w-[120px]">
+                {userName}
+              </div>
+              <div className="text-[10px] text-muted-foreground">En ligne</div>
+            </div>
+          </a>
         </div>
       </div>
     </header>

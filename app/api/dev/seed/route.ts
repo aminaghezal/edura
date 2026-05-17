@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth";
+import { recomputeRiskForSchool } from "@/lib/ai/recompute-risk";
 
 // One-click seed for development. Requires auth — seeds the LOGGED-IN user's school only.
 export async function POST() {
@@ -108,17 +109,14 @@ export async function POST() {
     const fnIdx = i % firstNames.length;
     const lnIdx = (i * 3) % lastNames.length;
     const klass = classes[i % classes.length];
-    const risk =
-      Math.random() < 0.15 ? "HIGH" : Math.random() < 0.3 ? "MODERATE" : "LOW";
-    const riskScore =
-      risk === "HIGH" ? 70 + Math.floor(Math.random() * 30) :
-      risk === "MODERATE" ? 40 + Math.floor(Math.random() * 30) :
-      10 + Math.floor(Math.random() * 30);
-
+    // Placeholder values — will be OVERWRITTEN by recomputeRiskForSchool() at the end of seeding
+    // This ensures risk is based on ACTUAL grades/attendance/payments, not random.
+    const risk = "LOW" as const;
+    const riskScore = 0;
     const rationaleByRisk: Record<string, string> = {
-      HIGH: "Moyenne en baisse + absences répétées. Contact parents recommandé cette semaine.",
-      MODERATE: "Moyenne en légère baisse. À surveiller au prochain trimestre.",
-      LOW: "Bons résultats, présence régulière.",
+      LOW: "Calcul en cours...",
+      MODERATE: "Calcul en cours...",
+      HIGH: "Calcul en cours...",
     };
 
     const stu = await prisma.student.create({
@@ -242,6 +240,11 @@ export async function POST() {
     .filter((x): x is NonNullable<typeof x> => x !== null);
   await prisma.schedule.createMany({ data: schedToCreate });
 
+  // ── Recompute risk scores using REAL data (not random seeded values) ──
+  // This ensures excellent students with no absences get LOW risk,
+  // and only students with actual issues get flagged HIGH.
+  const riskReport = await recomputeRiskForSchool(schoolId);
+
   return NextResponse.json({
     ok: true,
     summary: {
@@ -252,6 +255,10 @@ export async function POST() {
       attendance: attendanceData.length,
       payments: paymentData.length,
       schedule: schedToCreate.length,
+      riskRecomputed: riskReport.totalProcessed,
+      highRisk: riskReport.distribution.HIGH,
+      moderateRisk: riskReport.distribution.MODERATE,
+      lowRisk: riskReport.distribution.LOW,
     },
   });
 }

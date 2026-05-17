@@ -15,8 +15,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { UserPlus, Copy, Check } from "lucide-react";
-import { inviteTeammate, deactivateTeammate } from "./actions";
+import { UserPlus, Copy, Check, UserX, UserCheck } from "lucide-react";
+import { inviteTeammate, deactivateTeammate, reactivateTeammate } from "./actions";
 
 type TeamUser = {
   id: string;
@@ -35,6 +35,46 @@ const roleLabel: Record<string, string> = {
   SECRETARY: "Secrétaire",
   TEACHER: "Professeur",
 };
+
+// Group Algerian BAC classes by level + cycle (filière)
+function groupClasses(
+  classes: { id: string; name: string }[],
+): Record<string, Record<string, { id: string; name: string }[]>> {
+  const groups: Record<string, Record<string, { id: string; name: string }[]>> = {};
+
+  for (const c of classes) {
+    const nameLower = c.name.toLowerCase();
+
+    // Detect level
+    let level = "Autre";
+    if (/1[èe]re|1ere|1ère AS|1as/.test(nameLower)) level = "1ère AS";
+    else if (/2[èe]me|2eme|2ème AS|2as/.test(nameLower)) level = "2ème AS";
+    else if (/3[èe]me|3eme|3ème AS|3as/.test(nameLower)) level = "3ème AS";
+
+    // Detect cycle (filière)
+    let cycle = "Tronc commun";
+    if (/sciences?\s*exp|sc\.\s*exp|sc-exp|s\.exp/i.test(nameLower)) cycle = "Sciences expérimentales";
+    else if (/lettres?\s*phil|philo/i.test(nameLower)) cycle = "Lettres & Philosophie";
+    else if (/lettres?/i.test(nameLower)) cycle = "Lettres";
+    else if (/langues?/i.test(nameLower)) cycle = "Langues étrangères";
+    else if (/math[-\s]?tech|m[-\s]?t|technique/i.test(nameLower)) cycle = "Math-Technique";
+    else if (/math[ée]?l[ée]?me|math[éee]matique|^math|\bmath\b/i.test(nameLower)) cycle = "Mathématiques";
+    else if (/gestion|[ée]conomie/i.test(nameLower)) cycle = "Gestion & Économie";
+    else if (/sciences?/i.test(nameLower)) cycle = "Sciences expérimentales";
+
+    if (!groups[level]) groups[level] = {};
+    if (!groups[level][cycle]) groups[level][cycle] = [];
+    groups[level][cycle].push(c);
+  }
+
+  // Sort levels in the right order
+  const order = ["1ère AS", "2ème AS", "3ème AS", "Autre"];
+  return Object.fromEntries(
+    order
+      .filter((l) => groups[l])
+      .map((l) => [l, groups[l]]),
+  );
+}
 
 export function TeamClient({
   users,
@@ -116,8 +156,15 @@ export function TeamClient({
 
   function handleDeactivate(userId: string) {
     if (!confirm("Désactiver cet utilisateur ?")) return;
-    startTransition(() => {
-      deactivateTeammate(userId);
+    startTransition(async () => {
+      await deactivateTeammate(userId);
+    });
+  }
+
+  function handleReactivate(userId: string) {
+    if (!confirm("Réactiver cet utilisateur ?")) return;
+    startTransition(async () => {
+      await reactivateTeammate(userId);
     });
   }
 
@@ -217,24 +264,40 @@ export function TeamClient({
                   <>
                     <div>
                       <Label className="mb-2 block">Classes assignées</Label>
-                      <div className="border rounded-md p-3 max-h-32 overflow-auto space-y-2">
+                      <div className="border rounded-md p-3 max-h-48 overflow-auto space-y-3">
                         {classes.length === 0 && (
                           <p className="text-xs text-muted-foreground">
                             Aucune classe.
                           </p>
                         )}
-                        {classes.map((c) => (
-                          <label
-                            key={c.id}
-                            className="flex items-center gap-2 text-sm cursor-pointer"
-                          >
-                            <Checkbox
-                              checked={selectedClasses.has(c.id)}
-                              onCheckedChange={() => toggleClass(c.id)}
-                            />
-                            {c.name}
-                          </label>
-                        ))}
+                        {Object.entries(groupClasses(classes)).map(
+                          ([levelLabel, cycles]) => (
+                            <div key={levelLabel}>
+                              <div className="text-[10px] uppercase tracking-wider font-bold text-primary mb-1">
+                                {levelLabel}
+                              </div>
+                              {Object.entries(cycles).map(([cycleLabel, items]) => (
+                                <div key={cycleLabel} className="ml-2 mb-1.5">
+                                  <div className="text-[10px] uppercase text-muted-foreground mb-0.5">
+                                    {cycleLabel}
+                                  </div>
+                                  {items.map((c) => (
+                                    <label
+                                      key={c.id}
+                                      className="flex items-center gap-2 text-sm cursor-pointer pl-2 py-0.5"
+                                    >
+                                      <Checkbox
+                                        checked={selectedClasses.has(c.id)}
+                                        onCheckedChange={() => toggleClass(c.id)}
+                                      />
+                                      {c.name}
+                                    </label>
+                                  ))}
+                                </div>
+                              ))}
+                            </div>
+                          ),
+                        )}
                       </div>
                     </div>
                     <div>
@@ -313,12 +376,27 @@ export function TeamClient({
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDeactivate(u.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
                       >
+                        <UserX className="w-4 h-4 mr-1" />
                         Désactiver
                       </Button>
                     )}
-                    {!u.isActive && (
-                      <Badge variant="outline">Inactif</Badge>
+                    {u.role !== "DIRECTOR" && !u.isActive && (
+                      <div className="flex items-center justify-end gap-2">
+                        <Badge variant="outline" className="text-muted-foreground">
+                          Inactif
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleReactivate(u.id)}
+                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                        >
+                          <UserCheck className="w-4 h-4 mr-1" />
+                          Activer
+                        </Button>
+                      </div>
                     )}
                   </td>
                 </tr>

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { LogoutButton } from "./logout-button";
 import { SidebarNav } from "./sidebar-nav";
 import { TopBar } from "@/components/top-bar";
+import { MobileSidebar } from "./mobile-sidebar";
 
 export default async function AppLayout({
   children,
@@ -14,8 +15,11 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-sidebar flex flex-col">
+      {/* Mobile sidebar (drawer) */}
+      <MobileSidebar role={session.role} userName={session.name} />
+
+      {/* Desktop sidebar — hidden on mobile */}
+      <aside className="hidden lg:flex w-64 border-r bg-sidebar flex-col">
         <div className="px-5 py-5 border-b">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-primary-foreground text-sm font-extrabold shadow-sm">
@@ -38,7 +42,7 @@ export default async function AppLayout({
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <TopBar userName={session.name} />
         <main className="flex-1 overflow-auto bg-background">{children}</main>
       </div>

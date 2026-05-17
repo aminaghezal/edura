@@ -87,7 +87,7 @@ export function SettingsClient({
       {/* Plan card */}
       <Card className="mb-6">
         <CardContent className="p-5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
                 Abonnement
@@ -105,6 +105,44 @@ export function SettingsClient({
               {school.planStatus}
             </Badge>
           </div>
+
+          {/* Upgrade section (provisional, button not functional yet) */}
+          {school.planStatus === "TRIAL" && isDirector && (
+            <div className="mt-4 pt-4 border-t">
+              <div className="rounded-lg bg-gradient-to-br from-indigo-50 via-purple-50/30 to-emerald-50/30 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-emerald-950/30 p-4 border border-indigo-200/50 dark:border-indigo-800/30">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div>
+                    <h4 className="font-semibold text-sm">Passez à la version complète</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Débloquez l&apos;accès illimité à toutes les fonctionnalités EDURA.
+                    </p>
+                    <div className="text-2xl font-bold mt-2">
+                      200 000 <span className="text-sm text-muted-foreground font-normal">DZD / an</span>
+                    </div>
+                  </div>
+                  <Button
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                    onClick={() => alert("Module de paiement en cours d'intégration. Contactez-nous : contact@edura.dz")}
+                  >
+                    Upgrade
+                  </Button>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-indigo-200/30 dark:border-indigo-800/30">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+                    Modes de paiement acceptés
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <PaymentLogo label="CIB" colors="from-blue-600 to-blue-800" />
+                    <PaymentLogo label="EDAHABIA" colors="from-amber-500 to-amber-700" />
+                    <PaymentLogo label="CCP" colors="from-emerald-600 to-emerald-800" />
+                    <PaymentLogo label="VIREMENT" colors="from-slate-600 to-slate-800" />
+                    <PaymentLogo label="VISA" colors="from-indigo-600 to-indigo-900" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -190,6 +228,16 @@ export function SettingsClient({
           </form>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function PaymentLogo({ label, colors }: { label: string; colors: string }) {
+  return (
+    <div
+      className={`bg-gradient-to-r ${colors} text-white px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide shadow-sm`}
+    >
+      {label}
     </div>
   );
 }

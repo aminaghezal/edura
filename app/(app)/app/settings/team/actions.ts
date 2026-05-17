@@ -127,6 +127,24 @@ export async function deactivateTeammate(userId: string) {
     where: { id: userId },
     data: { isActive: false },
   });
+  revalidatePath("/app/settings/team");
+  return { ok: true as const };
+}
+
+export async function reactivateTeammate(userId: string) {
+  const session = await requireSession();
+  requireRole(session, "DIRECTOR");
+
+  const user = await prisma.user.findFirst({
+    where: { id: userId, schoolId: session.schoolId },
+    select: { id: true },
+  });
+  if (!user) return { ok: false as const, error: "Utilisateur introuvable" };
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { isActive: true },
+  });
 
   revalidatePath("/app/settings/team");
   return { ok: true as const };

@@ -141,18 +141,30 @@ export function GradesClient({
                   ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2)
                   : "—";
 
+                // Check if any grade is missing for this student
+                const allFilled = vals.length === subjects.length;
+
                 return (
                   <tr
                     key={stu.id}
-                    className={`border-b ${i % 2 === 0 ? "bg-background" : "bg-muted/20"}`}
+                    className={`border-b ${i % 2 === 0 ? "bg-background" : "bg-muted/20"} ${!allFilled ? "bg-red-50/30 dark:bg-red-950/10" : ""}`}
                   >
                     <td className="p-3 font-medium sticky left-0 bg-inherit whitespace-nowrap">
-                      {stu.firstName} {stu.lastName}
+                      <span className="flex items-center gap-2">
+                        {stu.firstName} {stu.lastName}
+                        {!allFilled && (
+                          <span
+                            className="inline-flex w-2 h-2 rounded-full bg-red-500"
+                            title={`${subjects.length - vals.length} note(s) manquante(s)`}
+                          />
+                        )}
+                      </span>
                     </td>
                     {subjects.map((sub) => {
                       const k = `${stu.id}-${sub.id}`;
                       const v = gradesMap.get(k);
                       const saving = savingKey === k;
+                      const missing = v == null;
                       return (
                         <td key={sub.id} className="p-1 text-center">
                           <Input
@@ -163,7 +175,8 @@ export function GradesClient({
                             defaultValue={v ?? ""}
                             disabled={saving}
                             onBlur={(e) => handleBlur(stu.id, sub.id, e.target.value)}
-                            className="w-16 text-center"
+                            className={`w-16 text-center ${missing ? "border-2 border-red-400 dark:border-red-600 bg-red-50/50 dark:bg-red-950/20" : ""}`}
+                            placeholder={missing ? "—" : ""}
                           />
                         </td>
                       );
