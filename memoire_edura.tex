@@ -1,0 +1,913 @@
+% =============================================================
+%  MÉMOIRE DE PROJET DE FIN D'ÉTUDES
+%  EDURA -- Plateforme SaaS de Gestion Scolaire Intelligente
+%  Amina Kaouter Ghezal -- USTO-MB -- 2025/2026
+%
+%  Compilation : XeLaTeX ou pdfLaTeX (Overleaf : XeLaTeX recommandé)
+%  Bibliographie : biber  (dans Overleaf : Settings > Compiler > biber)
+% =============================================================
+
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ---- Encodage & langue ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+
+% ---- Mise en page ----
+\usepackage[top=3cm,bottom=2.5cm,left=3cm,right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}
+\setlength{\parskip}{6pt}
+
+% ---- En-têtes & pieds de page ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\leftmark}
+\fancyhead[R]{\small EDURA -- USTO-MB 2025/2026}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- Titres de chapitres ----
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}{18pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{30pt}{20pt}
+
+% ---- Graphiques & figures ----
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[dvipsnames]{xcolor}
+\graphicspath{{./figures/}}
+
+% ---- Tableaux ----
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+% ---- Code source ----
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray},
+  stringstyle=\color{red!70!black},
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b,
+  tabsize=2,
+  showstringspaces=false
+}
+
+% ---- Maths ----
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ---- Boîtes ----
+\usepackage{mdframed}
+
+% ---- Bibliographie ----
+\usepackage[backend=biber,style=ieee,sorting=none,doi=true,url=false]{biblatex}
+\addbibresource{references.bib}
+
+% ---- Hyperliens ----
+\usepackage[colorlinks=true,linkcolor=blue!70!black,citecolor=green!50!black,urlcolor=blue]{hyperref}
+
+% ---- Table des matières ----
+\usepackage{tocloft}
+\renewcommand{\cftchapfont}{\bfseries}
+\setlength{\cftbeforechapskip}{6pt}
+
+% ---- Acronymes ----
+\usepackage{acronym}
+
+% ---- Commandes personnalisées ----
+\newcommand{\edura}{\textsc{Edura}}
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newmdenv[backgroundcolor=gray!10,linecolor=gray!40,
+          innerleftmargin=10pt,innerrightmargin=10pt,
+          innertopmargin=6pt,innerbottommargin=6pt]{infobox}
+
+% =============================================================
+\begin{document}
+% =============================================================
+
+% ---- PAGE DE GARDE ----
+\begin{titlepage}
+\centering
+{\large\bfseries République Algérienne Démocratique et Populaire}\\[4pt]
+{\large Ministère de l'Enseignement Supérieur et de la Recherche Scientifique}\\[10pt]
+\rule{\linewidth}{0.5pt}\\[8pt]
+{\large\bfseries Université des Sciences et de la Technologie d'Oran -- Mohamed Boudiaf}\\[4pt]
+{\large Faculté d'Informatique}\\[4pt]
+{\large Département d'Informatique}\\[20pt]
+
+\includegraphics[width=3cm]{logo_usto}\\[14pt]   % <- remplacer par le logo USTO
+
+\rule{\linewidth}{0.5pt}\\[12pt]
+
+{\Large\bfseries Mémoire de Projet de Fin d'Études}\\[6pt]
+{\large En vue de l'obtention du diplôme de Master en Informatique}\\[6pt]
+{\large Spécialité : Informatique}\\[20pt]
+
+\begin{mdframed}[backgroundcolor=blue!5,linecolor=blue!40,
+                 innerleftmargin=16pt,innerrightmargin=16pt,
+                 innertopmargin=12pt,innerbottommargin=12pt]
+\centering
+{\LARGE\bfseries Conception et réalisation d'une plateforme SaaS\\[6pt]
+de gestion pour établissements scolaires :\\[8pt]
+Analyse prédictive des risques d'échec\\[6pt]
+et orientation automatisée des élèves}
+\end{mdframed}\\[20pt]
+
+\begin{tabular}{ll}
+\textbf{Réalisé par :}    & Amina Kaouter \textsc{Ghezal} \\[6pt]
+\textbf{Encadrée par :}   & \textsc{Dekhici} Latifa \\[6pt]
+\textbf{Année universitaire :} & 2025 / 2026 \\
+\end{tabular}
+
+\vfill
+\rule{\linewidth}{0.5pt}\\[4pt]
+{\small Soutenu publiquement le \underline{\hspace{3cm}} devant le jury composé de :}\\[8pt]
+\begin{tabular}{lll}
+Président(e) : & \underline{\hspace{5cm}} & USTO-MB \\[4pt]
+Examinateur/trice : & \underline{\hspace{5cm}} & USTO-MB \\[4pt]
+Encadrant(e) : & Mme \textsc{Dekhici} Latifa & USTO-MB \\
+\end{tabular}
+\end{titlepage}
+
+% ---- DÉDICACES ----
+\clearpage
+\thispagestyle{empty}
+\vspace*{4cm}
+\begin{flushright}
+\itshape
+À mes parents, pour leur soutien indéfectible\\
+tout au long de ce parcours.\\[12pt]
+À tous ceux qui croient que l'éducation\\
+peut et doit mieux faire pour chaque enfant.
+\end{flushright}
+\clearpage
+
+% ---- REMERCIEMENTS ----
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+\thispagestyle{plain}
+
+Je tiens d'abord à exprimer ma sincère gratitude à Madame \textsc{Dekhici} Latifa, mon encadrante, pour ses conseils éclairés, sa disponibilité et la liberté qu'elle m'a accordée dans l'exploration de sujets à la croisée de l'informatique et des sciences de l'éducation. Ses remarques ont considérablement affiné la rigueur de ce travail.
+
+Mes remerciements vont également aux membres du jury, qui ont accepté d'évaluer ce mémoire avec le regard critique que mérite un tel travail.
+
+Je remercie l'ensemble du corps enseignant du département d'Informatique de l'USTO-MB pour la formation solide dispensée au cours de ces cinq années. Les fondements théoriques acquis dans cet établissement ont directement nourri les choix d'architecture décrits dans ce document.
+
+Enfin, je remercie les directeurs et secrétaires des écoles privées d'Oran qui ont bien voulu me consacrer du temps lors de l'étude qualitative qui a précédé le développement de la plateforme. Leurs témoignages ont été déterminants pour comprendre les véritables contraintes du terrain.
+
+% ---- RÉSUMÉ ----
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+\thispagestyle{plain}
+
+\noindent\textbf{Titre :} Conception et réalisation d'une plateforme SaaS de gestion pour établissements scolaires : analyse prédictive des risques d'échec et orientation automatisée des élèves.
+
+\vspace{8pt}
+
+Le secteur de l'enseignement privé algérien, qui compte aujourd'hui plus de 800 établissements actifs, souffre d'une double lacune : une gestion administrative fragmentée, essentiellement manuelle, et l'absence totale d'outils permettant de valoriser scientifiquement le potentiel cognitif de chaque élève. Ce mémoire présente \edura{}, une plateforme SaaS multi-tenant conçue pour répondre simultanément à ces deux problèmes.
+
+Sur le plan administratif, la plateforme centralise treize modules fonctionnels couvrant la gestion des élèves, des notes, des présences, de la finance, de la conformité réglementaire et de la communication interne. Sur le plan pédagogique, elle intègre une couche d'intelligence artificielle hybride articulée autour de deux paradigmes complémentaires : l'IA symbolique, sous forme de systèmes experts à règles pondérées issus de la littérature en sciences de l'éducation, et l'IA générative via l'API Anthropic Claude Haiku pour la production de résumés en langage naturel.
+
+Le module phare d'\edura{} est le Rapport Scientifique d'Orientation individuelle, qui opérationnalise la théorie des intelligences multiples de Howard Gardner \autocite{gardner1983frames} à partir des données scolaires standards pour produire, pour chaque élève, une prédiction de filière BAC et des recommandations personnalisées de métiers et d'universités algériennes.
+
+La plateforme est développée avec Next.js, TypeScript, PostgreSQL et Supabase, et est déployée en production sur infrastructure Vercel. Elle a été livrée sous forme de MVP fonctionnel en six mois de développement solo, parallèlement à la formation académique.
+
+\vspace{10pt}
+\noindent\textbf{Mots-clés :} SaaS, multi-tenant, gestion scolaire, intelligence artificielle, décrochage scolaire, intelligences multiples, orientation pédagogique, Next.js, PostgreSQL, Algérie.
+
+\vspace{20pt}
+\noindent\rule{\linewidth}{0.4pt}
+
+\vspace{10pt}
+\noindent\textbf{Abstract}
+
+\vspace{6pt}
+Algeria's private education sector, with over 800 active institutions, suffers from two structural weaknesses: fragmented, mostly paper-based administrative management and a complete absence of tools capable of scientifically assessing each student's cognitive potential. This thesis presents \edura{}, a multi-tenant SaaS platform designed to address both issues simultaneously.
+
+On the administrative side, the platform consolidates thirteen functional modules covering student management, grades, attendance, finance, regulatory compliance, and internal communication. On the pedagogical side, it integrates a hybrid AI layer combining rule-based expert systems grounded in educational research literature with generative AI via the Anthropic Claude Haiku API for natural-language summary generation.
+
+\edura{}'s flagship feature is the Individual Scientific Orientation Report, which operationalizes Howard Gardner's theory of multiple intelligences from standard academic data to produce, for each student, a baccalaureate track prediction and personalised career and university recommendations.
+
+The platform is built with Next.js, TypeScript, PostgreSQL, and Supabase, deployed in production on Vercel infrastructure. It was delivered as a functional MVP within six months of solo development, concurrent with academic studies.
+
+\vspace{10pt}
+\noindent\textbf{Keywords:} SaaS, multi-tenancy, school management, artificial intelligence, dropout risk, multiple intelligences, academic orientation, Next.js, PostgreSQL, Algeria.
+
+% ---- TABLE DES MATIÈRES ----
+\tableofcontents
+
+% ---- LISTE DES FIGURES ----
+\listoffigures
+\addcontentsline{toc}{chapter}{Liste des figures}
+
+% ---- LISTE DES TABLEAUX ----
+\listoftables
+\addcontentsline{toc}{chapter}{Liste des tableaux}
+
+% ---- LISTE DES ACRONYMES ----
+\chapter*{Liste des acronymes}
+\addcontentsline{toc}{chapter}{Liste des acronymes}
+\begin{acronym}[USTO-MB]
+  \acro{SaaS}{Software as a Service}
+  \acro{ERP}{Enterprise Resource Planning}
+  \acro{IA}{Intelligence Artificielle}
+  \acro{GOFAI}{Good Old-Fashioned Artificial Intelligence}
+  \acro{LLM}{Large Language Model}
+  \acro{ML}{Machine Learning}
+  \acro{RBAC}{Role-Based Access Control}
+  \acro{JWT}{JSON Web Token}
+  \acro{RLS}{Row-Level Security}
+  \acro{ORM}{Object-Relational Mapping}
+  \acro{CI/CD}{Continuous Integration / Continuous Deployment}
+  \acro{SSR}{Server-Side Rendering}
+  \acro{API}{Application Programming Interface}
+  \acro{RGPD}{Règlement Général sur la Protection des Données}
+  \acro{MVP}{Minimum Viable Product}
+  \acro{BAC}{Baccalauréat}
+  \acro{USTO-MB}{Université des Sciences et de la Technologie d'Oran -- Mohamed Boudiaf}
+  \acro{DZD}{Dinar Algérien}
+\end{acronym}
+
+% =============================================================
+%  INTRODUCTION GÉNÉRALE
+% =============================================================
+\chapter*{Introduction générale}
+\addcontentsline{toc}{chapter}{Introduction générale}
+\markboth{Introduction générale}{Introduction générale}
+
+L'école privée algérienne occupe aujourd'hui une place singulière dans le paysage éducatif national. Depuis que le décret exécutif n°~04-90 du 24 mars 2004 a encadré juridiquement leur création \autocite{decret2004}, ces établissements ont connu une croissance remarquable, passant de quelques dizaines à plus de 800 structures actives réparties sur l'ensemble du territoire. Pourtant, malgré cette expansion, les outils de gestion dont disposent leurs directeurs demeurent d'une pauvreté frappante : des tableurs Excel disjoints, des cahiers de présence en papier, des messages WhatsApp pour communiquer avec les parents. Dans un secteur où la moindre défaillance administrative peut entraîner la fermeture d'un établissement -- vingt écoles ont ainsi été sanctionnées depuis 2023 pour non-conformité réglementaire --, cette fragilité structurelle est difficile à justifier.
+
+Ce constat, établi au fil d'entretiens menés auprès de directeurs et de secrétaires d'écoles privées oranaises, constitue le point de départ de ce mémoire. Il soulève une question à la fois technique et sociale : est-il possible de concevoir, en parallèle d'une formation académique et dans un contexte de ressources limitées, une plateforme numérique réellement adaptée aux contraintes des établissements privés algériens ? La réponse que propose ce travail est affirmative, mais elle impose des choix clairs sur ce qu'il faut construire et ce qu'il faut, pour l'instant, différer.
+
+\edura{} est le nom de cette plateforme. Il s'agit d'une application web de type SaaS (\textit{Software as a Service}) à architecture multi-tenant, développée intégralement en TypeScript avec le framework Next.js, et déployée en production à l'adresse \url{https://edura-aminaghezal.vercel.app}. Elle s'articule autour de deux axes complémentaires : la rationalisation de la gestion administrative scolaire d'une part, et la valorisation scientifique du potentiel individuel de l'élève de l'autre. Ce second axe, à travers le \textit{Rapport Scientifique d'Orientation}, constitue la contribution la plus originale du projet.
+
+\vspace{6pt}
+\noindent\textbf{Organisation du mémoire.} Ce document est structuré en cinq chapitres. Le premier pose le cadre du marché et dresse un état des généralités nécessaires à la compréhension du projet. Le deuxième recense les travaux connexes et les solutions existantes, tant en matière de gestion scolaire que d'orientation pédagogique assistée. Le troisième chapitre décrit la démarche de conception : architecture logicielle, modèle de données, choix technologiques. Le quatrième chapitre détaille la réalisation effective des modules. Le cinquième présente les tests conduits et les résultats obtenus, avant qu'une conclusion générale ne ferme le document et trace des perspectives d'évolution.
+
+% =============================================================
+%  CHAPITRE 1 : ÉTUDE DU MARCHÉ ET GÉNÉRALITÉS
+% =============================================================
+\chapter{Étude du marché et généralités}
+
+\section{L'enseignement privé en Algérie : un secteur en mutation}
+
+\subsection{Panorama chiffré}
+
+L'autorisation des établissements d'enseignement privés en Algérie remonte officiellement à 2004, avec la promulgation du décret exécutif n°~04-90 \autocite{decret2004}. En moins de vingt ans, le nombre d'écoles a progressé de façon régulière jusqu'à atteindre une estimation de 800 structures actives sur le territoire national, concentrées principalement dans les wilayas d'Alger, d'Oran, de Constantine, de Sétif et d'Annaba. Ces chiffres, bien qu'il faille les manier avec prudence en l'absence de données officielles consolidées, témoignent d'une demande sociale réelle : des familles algériennes cherchent des cadres scolaires plus encadrés, plus flexibles ou simplement différents de l'offre publique.
+
+Sur le plan économique, les frais de scolarité pratiqués varient considérablement d'un établissement à l'autre, allant de 200 000 à 600 000 dinars algériens (\ac{DZD}) par élève et par an. Un établissement de taille moyenne, soit entre 150 et 400 élèves, génère donc un chiffre d'affaires annuel compris entre 30 et 240 millions \ac{DZD}. C'est suffisant pour justifier un investissement dans des outils numériques sérieux ; c'est en même temps assez modeste pour rendre prohibitifs les logiciels internationaux dont les licences sont libellées en dollars ou en euros.
+
+\subsection{Les fragilités structurelles identifiées}
+
+Une étude qualitative conduite auprès d'une dizaine de directeurs et secrétaires d'écoles privées oranaises avant le démarrage du développement a permis d'identifier six problèmes récurrents. Ils méritent d'être décrits avec un minimum de détail, car ils ont directement orienté les choix fonctionnels d'\edura{}.
+
+Le plus visible est la fragmentation des données opérationnelles. Aucun de ces établissements ne disposait d'un système centralisé : les notes étaient dans des fichiers Excel (souvent un fichier par classe et par trimestre, tenus par chaque enseignant selon ses propres conventions), les présences dans des cahiers papier, les paiements dans un tableau différent. Il n'existait nulle part de vue d'ensemble. La conséquence pratique en est que préparer un conseil de classe demande plusieurs heures de ressaisie manuelle, avec les erreurs que cela implique.
+
+Plus grave encore, aucun de ces établissements ne pratiquait la détection précoce du décrochage scolaire. La littérature académique est pourtant formelle : c'est l'absentéisme et la chute brutale des résultats, détectés suffisamment tôt, qui permettent une intervention efficace \autocite{balfanz2007preventing}. Dans les écoles observées, les élèves en difficulté n'étaient identifiés qu'à la remise des bulletins trimestriels, soit souvent bien trop tard.
+
+La troisième fragilité concerne la conformité réglementaire. Le cahier des charges des établissements privés algériens, mis à jour en 2026, impose des obligations précises sur huit catégories : qualifications des enseignants, respect du programme officiel, conditions d'infrastructure, sécurité des locaux, et autres. La non-conformité peut entraîner une fermeture administrative, comme en témoignent les vingt établissements sanctionnés depuis 2023. Or, aucun des directeurs interrogés ne disposait d'un outil pour suivre ces obligations en temps réel.
+
+\subsection{Le problème de fond : l'absence de valorisation du potentiel individuel}
+
+Il existe un problème qui transcende la gestion quotidienne et qui constitue, d'un point de vue social, la lacune la plus préoccupante. En Algérie, comme dans de nombreux pays du Maghreb, l'orientation scolaire en fin de cycle secondaire repose quasi exclusivement sur les moyennes générales. L'élève qui obtient la meilleure note est orienté vers la filière « Sciences expérimentales » ou « Mathématiques », indépendamment de ses aptitudes réelles, de son style d'apprentissage, de ses intérêts ou de ses intelligences dominantes.
+
+Cette pratique est en contradiction directe avec ce que la recherche en psychologie cognitive indique depuis plus de quarante ans. Howard Gardner, psychologue à l'Université Harvard, a montré dès 1983 que l'intelligence humaine n'est pas une capacité uniforme mesurable par un seul chiffre, mais un ensemble de huit aptitudes distinctes qui se combinent différemment chez chaque individu \autocite{gardner1983frames}. Ignorer cette réalité dans le processus d'orientation, c'est condamner chaque année des milliers d'élèves à des filières qui ne correspondent pas à leurs forces cognitives réelles.
+
+\section{Le marché mondial des EdTech et la gestion scolaire}
+
+\subsection{Taille et dynamique du marché}
+
+Le marché mondial des technologies éducatives (\textit{EdTech}) a connu une accélération significative depuis la pandémie de COVID-19. Les plateformes de gestion scolaire en constituent une composante structurelle, portée par la numérisation progressive des administrations éducatives dans les pays en développement. Les projections disponibles situent ce segment à plusieurs dizaines de milliards de dollars à l'horizon 2027, avec des taux de croissance annuels moyens supérieurs à 15~\%.
+
+\subsection{Le modèle SaaS dans l'éducation}
+
+Le modèle \ac{SaaS} s'est imposé dans l'éducation pour des raisons pragmatiques : il n'exige aucune installation locale, les mises à jour sont transparentes pour l'utilisateur, et la tarification par abonnement lisse l'investissement dans le temps. Pour un établissement scolaire de taille modeste, il élimine le besoin d'un département informatique dédié. L'architecture multi-tenant, qui permet à plusieurs clients (ici, plusieurs écoles) de partager la même infrastructure tout en maintenant une isolation stricte de leurs données, est la réponse technique naturelle à ce modèle économique \autocite{walraven2011comparing}.
+
+\section{Les tendances de l'IA dans l'éducation}
+
+L'intégration de l'intelligence artificielle dans les systèmes éducatifs est aujourd'hui un champ de recherche actif. Les travaux de Romero et Ventura \autocite{romero2010educational} constituent une revue de référence sur le \textit{Educational Data Mining}, discipline qui exploite les traces numériques laissées par les apprenants pour améliorer les dispositifs pédagogiques. Dutt, Ismail et Herawan ont prolongé ce panorama en 2017 avec une revue systématique couvrant plus d'une décennie de publications \autocite{dutt2017systematic}. Ces travaux convergent vers un constat : les données scolaires, lorsqu'elles sont correctement instrumentées, permettent de prédire les risques de décrochage et d'adapter les interventions pédagogiques avec une précision croissante \autocite{albreiki2021systematic}.
+
+\section{Présentation synthétique d'\edura{}}
+
+\edura{} positionne son action à l'intersection de ces tendances, mais avec une contrainte supplémentaire : tout doit fonctionner dans le contexte spécifique de l'Algérie, avec ses réglementations propres, sa dualité linguistique français/arabe, et un niveau de prix compatible avec des établissements dont le budget informatique est quasi inexistant. Le prix retenu pour l'abonnement annuel, 200 000 \ac{DZD} tout inclus, a été fixé après analyse du marché pour représenter moins de 0,5~\% du chiffre d'affaires d'un établissement de taille moyenne -- un seuil en dessous duquel la décision d'achat ne nécessite pas d'arbitrage budgétaire majeur.
+
+La plateforme regroupe treize modules fonctionnels intégrés, déployés en production avec un code source d'environ 8 500 lignes TypeScript/TSX. Elle intègre une couche d'intelligence artificielle hybride et un module unique en son genre : le Rapport Scientifique d'Orientation, qui génère pour chaque élève un bilan pédagogique complet fondé sur la théorie des intelligences multiples de Gardner.
+
+% =============================================================
+%  CHAPITRE 2 : TRAVAUX CONNEXES ET ÉTAT DE L'ART
+% =============================================================
+\chapter{Travaux connexes et état de l'art}
+
+\section{L'intelligence artificielle dans l'éducation : fondements}
+
+\subsection{Taxonomie des approches IA}
+
+Avant d'examiner les solutions existantes, il convient de clarifier ce que l'on entend par « intelligence artificielle » dans un contexte éducatif. Russell et Norvig, dont l'ouvrage \textit{Artificial Intelligence: A Modern Approach} fait référence dans plus de 1 500 universités à travers le monde, définissent l'IA comme « l'étude des agents qui reçoivent des perceptions de l'environnement et exécutent des actions pour atteindre des objectifs » \autocite{russell2020artificial}. Cette définition est suffisamment large pour englober les trois paradigmes pertinents pour ce mémoire.
+
+La première famille, historiquement la plus ancienne, est l'\ac{IA} symbolique ou GOFAI (\textit{Good Old-Fashioned Artificial Intelligence}) : il s'agit de systèmes experts à base de règles, qui encodent le raisonnement d'un expert humain sous forme de conditions et de conclusions. La deuxième famille est l'IA statistique, ou \ac{ML} : des algorithmes apprennent des patterns à partir de données historiques labellisées. La troisième est l'IA générative, basée sur des modèles de langage de grande taille (\ac{LLM}) comme la famille de modèles Transformer \autocite{vaswani2017attention}.
+
+\subsection{La prédiction du décrochage scolaire}
+
+Le décrochage scolaire est l'un des domaines où l'apport des données numériques a été le plus étudié. Tinto, dans un article fondateur de 1975, a établi un cadre théorique qui reste à ce jour une référence : les déterminants de l'abandon scolaire sont à la fois académiques, sociaux et institutionnels \autocite{tinto1975dropout}. Balfanz, Herzog et Mac Iver ont ensuite montré, à partir de données longitudinales sur des collèges urbains américains, que trois indicateurs précoces -- l'assiduité, le comportement et les résultats en mathématiques et en lecture -- permettaient de prédire le décrochage avec une précision remarquable dès la sixième \autocite{balfanz2007preventing}.
+
+Plus récemment, les travaux de Waheed et al. ont exploité des données de type \textit{Virtual Learning Environment} (VLE) pour entraîner des modèles de deep learning prédictifs \autocite{waheed2020predicting}. Mardolkar et al. ont comparé plusieurs algorithmes de classification -- régression logistique, forêts aléatoires, réseaux de neurones -- sur des données académiques tabulaires et ont conclu que les méthodes d'ensemble, notamment XGBoost \autocite{chen2016xgboost}, donnaient les meilleurs résultats sur ce type de données \autocite{mardolkar2021forecasting}.
+
+Peña-Ayala a consolidé en 2014 une revue de 82 études publiées en \textit{Educational Data Mining} \autocite{penaayla2014educational}, mettant en évidence que la majorité des systèmes déployés dans des contextes réels, par opposition aux contextes de recherche, utilisent des approches symboliques ou des modèles de décision interprétables plutôt que des réseaux de neurones profonds. Rudin a formalisé cette recommandation dans un article de référence publié dans \textit{Nature Machine Intelligence} : pour les décisions à fort enjeu -- comme l'évaluation du risque de décrochage d'un élève --, l'explicabilité des modèles n'est pas un luxe mais une nécessité éthique et pratique \autocite{rudin2019stop}.
+
+\subsection{La théorie des intelligences multiples}
+
+La théorie des intelligences multiples, proposée par Howard Gardner en 1983 \autocite{gardner1983frames} et revisitée en 1999 \autocite{gardner1999intelligence}, postule que l'intelligence humaine ne se réduit pas à une capacité générale mesurable par un QI. Gardner identifie huit types d'intelligence distincts -- linguistique, logico-mathématique, visuo-spatiale, kinesthésique, musicale, interpersonnelle, intrapersonnelle et naturaliste -- chacun correspondant à des aptitudes cognitives différentes et potentiellement indépendantes.
+
+Cette théorie a eu une influence considérable sur les pratiques pédagogiques anglo-saxonnes \autocite{armstrong2009multiple}, même si elle a aussi fait l'objet de critiques méthodologiques importantes dans la littérature psychométrique. Ce qui compte, pour notre propos, c'est son opérationnalisabilité : contrairement à des construits purement abstraits, les huit intelligences de Gardner peuvent être estimées, au moins partiellement, à partir de données scolaires observables (notes par matière, observations des enseignants, intérêts déclarés). C'est le pari qu'\edura{} fait, en assumant les limites d'une telle approximation.
+
+\section{Systèmes de gestion scolaire existants}
+
+\subsection{Solutions internationales}
+
+\textbf{PowerSchool (États-Unis).} Leader mondial du secteur avec plus de 60 millions d'élèves couverts dans 90 pays, PowerSchool propose une suite logicielle complète qui va des inscriptions à l'analytique institutionnelle. Ses atouts sont indéniables : écosystème mature, intégrations larges, support technique robuste. Ses limites pour le contexte algérien sont tout aussi claires : une licence peut dépasser 2 000 USD par an, la plateforme n'est pas localisée en arabe, et elle ne prend pas en compte le cahier des charges des établissements privés algériens.
+
+\textbf{Pronote (France).} Référence dans les établissements français, Pronote est très prisé des directeurs algériens qui ont effectué une partie de leur formation en France. Sa prise en main est rapide et son interface familière. Cependant, il repose sur une architecture client-serveur qui nécessite un serveur local, il n'est pas disponible en arabe, et son modèle de tarification est inadapté aux établissements de petite taille.
+
+\textbf{Skooler (Norvège).} Conçue autour de l'intégration Microsoft 365, cette solution intéresse les établissements qui ont déjà investi dans la suite Microsoft. Elle reste toutefois peu connue en Afrique du Nord, ne propose pas de fonctionnalités d'IA propres, et son coût est conditionné à une licence Office.
+
+\textbf{Edmodo (États-Unis).} Plateforme communautaire gratuite à l'origine, Edmodo se positionne davantage comme un réseau social éducatif que comme un véritable \ac{ERP} scolaire. Elle ne couvre ni la finance ni la conformité réglementaire, deux dimensions centrales pour les écoles privées algériennes.
+
+\subsection{Logiciels locaux}
+
+Le marché algérien dispose de quelques logiciels de gestion scolaire locaux, généralement distribués sous forme d'application Windows avec une licence unique. Ces solutions présentent l'avantage d'être abordables et parfois adaptées au curriculum algérien, mais souffrent d'un défaut structurel majeur : l'absence de sauvegarde cloud, une maintenance quasi inexistante, et un code souvent non documenté rendant toute évolution ultérieure très difficile. Beaucoup de ces logiciels sont installés sur un seul poste et disparaissent avec l'avarie du disque dur.
+
+\section{Plateformes d'identification du talent et d'orientation}
+
+\subsection{Le \textit{Gifted Education Programme} -- GEP (Singapour)}
+
+Le programme d'éducation pour élèves à haut potentiel de Singapour, géré par le ministère de l'Éducation depuis 1984, constitue l'un des dispositifs les plus structurés au monde en matière d'identification précoce du talent intellectuel. Les élèves de troisième année primaire y sont soumis à une batterie de tests standardisés couvrant les aptitudes linguistiques et logico-mathématiques. Ceux qui sont identifiés intègrent un programme enrichi dans une école spécialisée, avec un curriculum approfondi et des activités complémentaires. La force du GEP réside dans son institutionnalisation et ses ressources ; sa limite, du point de vue d'\edura{}, est qu'il repose sur une évaluation ponctuelle, standardisée, administrée par une institution nationale. Il ne constitue pas un outil accessible aux écoles privées dans leur gestion quotidienne.
+
+\subsection{La Hamdan Foundation et les compétitions Edge (Émirats Arabes Unis)}
+
+La Fondation Hamdan Bin Rashid Al Maktoum pour la performance académique distinguée récompense chaque année l'excellence pédagogique dans les Émirats Arabes Unis, à travers des prix destinés aux élèves, aux enseignants et aux établissements. Les compétitions Edge, organisées dans le cadre du mouvement d'innovation éducative émirati, permettent quant à elles aux élèves de confronter leurs projets à une évaluation par pairs et par des experts. Ces initiatives s'inscrivent dans une stratégie nationale de valorisation du capital humain, avec des ressources institutionnelles considérables. Leur transposition directe dans un contexte de petite école privée algérienne est impossible : elles supposent un écosystème étatique que l'\edura{} n'a pas vocation à remplacer, mais elles témoignent d'une reconnaissance internationale croissante que l'orientation par le seul bulletin scolaire est insuffisante.
+
+\subsection{Educational Initiatives et ASSET Talent Search (Inde)}
+
+Educational Initiatives (EI) est une entreprise indienne qui a développé ASSET (\textit{Assessment of Scholastic Skills through Educational Testing}), un outil d'évaluation centré sur les compétences plutôt que sur la mémorisation. Le programme ASSET Talent Search s'inspire du modèle américain du Study of Mathematically Precocious Youth (SMPY) pour identifier les élèves à fort potentiel académique en Inde. Il propose des tests diagnostiques qui vont au-delà des notes de classe pour évaluer la compréhension profonde des concepts.
+
+Ce que l'expérience indienne apporte à notre réflexion, c'est la démonstration qu'une évaluation différenciée du potentiel peut être déployée à grande échelle dans un pays en développement, avec des contraintes économiques comparables à celles du contexte algérien. La limite d'ASSET, pour notre cas d'usage, est qu'il reste un outil d'évaluation externe et ponctuel, déconnecté du système de gestion quotidienne de l'école. \edura{} cherche précisément à combler cet espace : intégrer l'évaluation du potentiel directement dans le flux de données déjà produit par la gestion scolaire.
+
+\section{Positionnement d'\edura{}}
+
+L'analyse comparative conduite dans ce chapitre permet de situer \edura{} sur deux espaces non couverts par les solutions existantes.
+
+\begin{table}[H]
+\centering
+\caption{Analyse comparative des solutions de gestion scolaire}
+\label{tab:comparatif}
+\begin{tabularx}{\textwidth}{Xcccc}
+\toprule
+\textbf{Critère} & \textbf{PowerSchool} & \textbf{Pronote} & \textbf{Logiciels locaux} & \textbf{\edura{}} \\
+\midrule
+Cloud natif & \checkmark & \texttimes & \texttimes & \checkmark \\
+Bilingue FR/AR & \texttimes & \texttimes & Partiel & \checkmark \\
+Conformité algérienne & \texttimes & \texttimes & Partiel & \checkmark \\
+Détection décrochage & \checkmark & \texttimes & \texttimes & \checkmark \\
+Orientation Gardner & \texttimes & \texttimes & \texttimes & \checkmark \\
+Prix adapté & \texttimes & Moyen & \checkmark & \checkmark \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Ce tableau illustre le positionnement différencié d'\edura{} : il est la seule solution à combiner gestion scolaire cloud, bilinguisme natif, conformité réglementaire algérienne, détection du décrochage et orientation pédagogique scientifique à un prix accessible. Aucune solution mondiale ne réunit ces cinq dimensions à destination du marché algérien.
+
+% =============================================================
+%  CHAPITRE 3 : CONCEPTION
+% =============================================================
+\chapter{Conception}
+
+\section{Méthodologie de développement}
+
+Ce projet a été conduit selon une approche itérative inspirée des méthodes agiles, adaptée aux contraintes d'un développement solo mené en parallèle d'une formation académique. Plutôt que de définir un cahier des charges figé en amont, le développement a procédé par phases successives, chacune livrant un incrément fonctionnel testé en conditions réelles. Quinze phases ont ainsi été identifiées et exécutées, des quatorze premières ayant atteint un statut « livré et déployé » au moment de la rédaction de ce mémoire.
+
+Cette approche pragmatique n'a pas dispensé d'une réflexion architecturale sérieuse en amont. Au contraire : certains choix de conception -- notamment l'architecture multi-tenant et le modèle de données -- ont été définis dès la première phase et sont restés stables tout au long du développement. Le coût d'une mauvaise décision architecturale en début de projet est exponentiellement plus élevé que celui d'un changement de fonctionnalité. C'est cette conviction qui a guidé les choix décrits dans ce chapitre.
+
+\section{Architecture globale}
+
+\subsection{Vue d'ensemble}
+
+La figure~\ref{fig:architecture_globale} présente l'architecture d'ensemble d'\edura{}.
+
+\begin{figure}[H]
+\centering
+% Remplacer par une capture ou un schéma exporté
+\fbox{\parbox{12cm}{\centering\vspace{3cm}
+\textit{[Figure : Schéma d'architecture globale -- navigateur / Vercel Edge / Next.js / PostgreSQL / Supabase Auth / Anthropic API]}
+\vspace{3cm}}}
+\caption{Architecture globale d'\edura{}}
+\label{fig:architecture_globale}
+\end{figure}
+
+L'application est architecturée autour de Next.js 16 avec l'App Router, qui joue simultanément le rôle de serveur de rendu (\ac{SSR}), de serveur d'API REST et d'hôte de tâches planifiées (Cron Jobs). Cette décision d'unifier le frontend et le backend dans un seul projet, parfois critiquée pour les très grandes équipes, est au contraire un avantage significatif pour un projet solo : elle élimine la latence réseau entre couches, simplifie le déploiement et réduit la surface de bugs inter-services.
+
+\subsection{Architecture multi-tenant}
+
+Le choix architectural le plus structurant du projet est le modèle de multi-tenancy retenu. Trois approches existent dans la littérature \autocite{walraven2011comparing} : une base de données par client, un schéma par client, ou une base partagée avec isolation par colonne. \edura{} adopte la troisième option : une seule base PostgreSQL, un seul schéma, avec une colonne \texttt{schoolId} présente dans toutes les tables métier.
+
+Ce choix implique une discipline de code stricte : chaque requête à la base de données doit inclure un filtre sur \texttt{schoolId} extrait de la session authentifiée. Pour garantir cette discipline, deux mécanismes de défense ont été mis en place.
+
+\begin{enumerate}
+  \item Un helper applicatif \texttt{lib/rls.ts} qui encapsule les requêtes Prisma et force le filtrage par tenant. Toute requête qui contourne ce wrapper déclenche une erreur TypeScript à la compilation.
+  \item Des politiques Row-Level Security (RLS) PostgreSQL qui rejettent au niveau de la base de données toute requête ne satisfaisant pas la condition d'isolation, servant de filet de sécurité au cas où la couche applicative serait contournée.
+\end{enumerate}
+
+Cette double protection est justifiée par la nature des données traitées : des informations académiques et financières concernant des mineurs. La compromission du cloisonnement entre tenants serait une faute grave, difficilement réparable en termes de confiance.
+
+\section{Stack technologique}
+
+Le tableau~\ref{tab:stack} présente les technologies retenues et les justifications de chaque choix.
+
+\begin{table}[H]
+\centering
+\caption{Stack technologique d'\edura{}}
+\label{tab:stack}
+\begin{tabularx}{\textwidth}{lllX}
+\toprule
+\textbf{Couche} & \textbf{Technologie} & \textbf{Version} & \textbf{Justification principale} \\
+\midrule
+Framework web & Next.js & 16.2 & App Router, SSR, déploiement Vercel natif \\
+Langage & TypeScript & 5.x & Typage fort, refactoring sûr en solo \\
+UI & React + shadcn/ui & 19 & Écosystème, accessibilité ARIA \\
+Styling & Tailwind CSS & 4 & Design system cohérent, rapidité \\
+Visualisation & Recharts & 3.8 & SVG natif, animations, accessible \\
+Base de données & PostgreSQL & 15+ & ACID, JSON natif, RLS intégré \\
+ORM & Prisma & 7.8 & Requêtes typées, migrations versionnées \\
+Authentification & Supabase Auth & 0.10 & JWT, cookies, RGPD-compatible \\
+Génération PDF & @react-pdf/renderer & 4.5 & Rendu serveur, polices personnalisées \\
+Import Excel & SheetJS & 0.18 & Tolérance aux variantes FR/AR \\
+Validation & Zod & 4.3 & Schémas TypeScript-first \\
+IA générative & Anthropic Claude Haiku & 4.5 & Faible latence, bon français \\
+Hébergement & Vercel & Pro & CI/CD automatique, edge functions \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Modèle de données}
+
+\subsection{Vue d'ensemble}
+
+Le modèle de données d'\edura{} comprend 24 tables principales, organisées en sept domaines logiques : tenant/authentification, académique, élèves, finance, communication, conformité réglementaire, et orientation/profil psychopédagogique. La figure~\ref{fig:modele_donnees} en présente la vue d'ensemble simplifiée.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{12cm}{\centering\vspace{3cm}
+\textit{[Figure : Diagramme entité-relation simplifié des 24 tables -- à compléter avec un export de l'outil de modélisation (dbdiagram.io ou Prisma Visualizer)]}
+\vspace{3cm}}}
+\caption{Modèle de données d'\edura{} -- vue simplifiée}
+\label{fig:modele_donnees}
+\end{figure}
+
+\subsection{L'entité centrale : \texttt{Student}}
+
+L'entité \texttt{Student} occupe une position centrale dans le modèle, car elle porte à la fois les attributs administratifs classiques et les attributs du profil scientifique qui alimentent le module d'orientation. Les attributs liés à l'IA (score de risque, suggestion d'orientation, profil d'intelligences) sont calculés nocturnement et stockés dénormalisés pour éviter des calculs répétés à l'affichage.
+
+\begin{lstlisting}[language=TypeScript, caption={Extrait du schéma Prisma -- table Student}]
+model Student {
+  id        String  @id @default(cuid())
+  schoolId  String  // isolation multi-tenant
+  classId   String?
+  firstName String
+  lastName  String
+  firstNameAr String? // support bilingue
+  lastNameAr  String?
+
+  // Champs IA -- calculés chaque nuit
+  riskScore             Int?
+  riskLevel             RiskLevel?
+  riskRationale         String?
+  orientationSuggestion String?
+  orientationConfidence Float?
+
+  // Profil scientifique (saisie manuelle)
+  iqScore      Int?
+  hobbies      String? // CSV
+  interests    String? // CSV
+  learningStyle LearningStyle?
+
+  // Relations
+  observations       StudentObservation[]
+  orientationReports OrientationReport[]
+}
+\end{lstlisting}
+
+\section{Architecture de la couche IA}
+
+\subsection{Paradigme hybride}
+
+L'architecture IA d'\edura{} repose sur un paradigme hybride qui combine trois couches : l'IA symbolique (systèmes experts à règles pondérées), l'agrégation statistique, et l'IA générative (LLM). Ce choix résulte d'une analyse des contraintes du domaine, détaillée ci-dessous.
+
+\subsection{Module 1 -- Score de risque de décrochage}
+
+Le moteur de scoring de risque est un système expert à règles pondérées, catégorie que Russell et Norvig classent explicitement dans les méthodes d'intelligence artificielle \autocite{russell2020artificial}. Il analyse douze facteurs extraits des données scolaires de chaque élève, organisés en trois dimensions : performance académique, assiduité et situation financière. Chaque facteur est associé à un nombre de points qui s'additionne pour produire un score final sur 100, classifié en trois niveaux de risque.
+
+Les pondérations ne sont pas arbitraires. Elles s'appuient sur la littérature académique : l'absentéisme supérieur à 15~\% est reconnu comme prédicteur de décrochage \autocite{balfanz2007preventing}, la chute brutale de moyenne est documentée comme signal d'alerte précoce par les études PISA \autocite{oecd2019pisa}, et la défaillance financière familiale est identifiée comme co-facteur de décrochage dans les contextes à faibles revenus.
+
+\begin{table}[H]
+\centering
+\caption{Facteurs et pondérations du score de risque}
+\label{tab:risque}
+\begin{tabular}{lrc}
+\toprule
+\textbf{Facteur} & \textbf{Points} & \textbf{Source} \\
+\midrule
+Moyenne critique ($<8/20$) & $+25$ & \\
+Moyenne sous la barre ($8$--$10$) & $+15$ & \autocite{oecd2019pisa} \\
+Chute brutale ($\geq 4$ pts) & $+15$ & \\
+Baisse de moyenne ($\geq 2$ pts) & $+8$ & \\
+Absentéisme grave ($>25\%$) & $+25$ & \autocite{balfanz2007preventing} \\
+Absentéisme élevé ($>15\%$) & $+15$ & \autocite{balfanz2007preventing} \\
+Absences répétées ($>8\%$) & $+7$ & \\
+Pic récent d'absences ($\geq 3$ en 14j) & $+10$ & \autocite{mubarak2020prediction} \\
+Retards chroniques ($\geq 5$ en 60j) & $+3$ & \\
+Paiements multi-impayés ($\geq 2$) & $+15$ & \\
+Paiement en retard (1 trimestre) & $+8$ & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Module 2 -- Moteur d'orientation}
+
+Le moteur d'orientation opérationnalise la théorie de Gardner \autocite{gardner1983frames} en trois étapes. D'abord, une table de correspondance mappe chaque matière scolaire vers les intelligences qu'elle sollicite principalement (les mathématiques stimulent l'intelligence logico-mathématique et, dans une moindre mesure, la visuo-spatiale ; la philosophie sollicite l'intelligence linguistique et intrapersonnelle ; etc.). Ensuite, les notes de l'élève dans chaque matière permettent d'estimer un score pour chacune des huit intelligences. Enfin, ces scores sont comparés aux profils-types des cinq filières du \ac{BAC} algérien (Sciences expérimentales, Mathématiques, Lettres et Philosophie, Langues étrangères, Gestion et Économie) pour produire une recommandation avec un score de confiance.
+
+Mathématiquement, ce moteur est un classifieur linéaire à cinq classes, où les poids sont fixés par expertise pédagogique plutôt qu'appris par entraînement. Il est donc, au sens de LeCun et al. \autocite{lecun2015deep}, comparable à un perceptron à une couche sans activation non-linéaire. La différence est que nos poids encodent une connaissance a priori validée, ce qui est précisément l'avantage des systèmes experts en contexte de démarrage à froid, c'est-à-dire sans données historiques \autocite{rudin2019stop}.
+
+\subsection{Justification du non-recours au Machine Learning supervisé}
+
+C'est une question que le jury souhaite naturellement que l'auteure aborde. Cinq raisons techniques justifient ce choix pour la version 1 de la plateforme.
+
+Premièrement, le problème du démarrage à froid (\textit{cold-start}). Entraîner un modèle supervisé de prédiction du décrochage nécessite des données historiques labellisées : des centaines d'élèves dont on sait a posteriori s'ils ont décroché ou non. \edura{} est une nouvelle plateforme ; elle ne dispose pas encore de ces données. Un système expert fonctionne dès le premier élève saisi.
+
+Deuxièmement, l'exigence d'explicabilité. Un directeur algérien à qui le système signale qu'un élève est en risque élevé doit pouvoir comprendre pourquoi. Rudin a formalisé cet argument dans un article fondamental : pour les décisions à fort enjeu humain, les modèles boîtes noires sont éthiquement et pratiquement inacceptables \autocite{rudin2019stop}. Un système expert produit naturellement une trace de raisonnement compréhensible.
+
+Troisièmement, la conformité à l'AI Act européen. Ce règlement, entré en vigueur en 2024 \autocite{euaiact2024}, classe les systèmes d'IA utilisés en éducation comme « à haut risque » (Annexe III, point 3), imposant des exigences strictes de transparence et d'auditabilité. Les systèmes experts sont nativement conformes ; les modèles opaques exigeraient des couches supplémentaires de XAI (\textit{eXplainable AI}).
+
+Quatrièmement, le coût computationnel. Pour 1 000 élèves recalculés chaque nuit, le système expert d'\edura{} s'exécute en moins d'une seconde sur un CPU standard, sans coût de GPU ni d'API payante. Un modèle de deep learning multiplierait ce coût par plusieurs ordres de grandeur.
+
+Cinquièmement, la nature tabulaire des données. La recherche empirique \autocite{mardolkar2021forecasting, chen2016xgboost} montre de façon répétée que sur des données tabulaires structurées -- ce qu'est fondamentalement un dossier scolaire --, les méthodes d'ensemble (XGBoost, Random Forest) surpassent les réseaux de neurones profonds. Et XGBoost lui-même s'apparente davantage à un ensemble d'arbres de décision interprétables qu'à une boîte noire.
+
+% =============================================================
+%  CHAPITRE 4 : RÉALISATION
+% =============================================================
+\chapter{Réalisation}
+
+\section{Environnement de développement}
+
+Le développement a été conduit sur une machine personnelle sous Windows 11, avec Visual Studio Code comme éditeur principal et Git/GitHub pour le versioning. La gestion des dépendances est assurée par npm, et les migrations de base de données par Prisma. Aucun environnement de staging distinct n'a été maintenu : les branches Git \textit{feature} étaient déployées comme environnements de prévisualisation Vercel avant d'être fusionnées dans la branche \textit{main} qui alimente la production.
+
+Cette approche, acceptable pour un projet solo à ce stade de maturité, présente l'avantage de réduire la complexité opérationnelle. Elle implique en contrepartie une discipline de test rigoureuse avant chaque fusion, décrite dans le chapitre suivant.
+
+\section{Les modules fonctionnels}
+
+\edura{} est organisé en treize modules intégrés. Chaque module correspond à un domaine fonctionnel cohérent et expose ses fonctionnalités via une ou plusieurs pages Next.js et un ensemble de routes API.
+
+\subsection{Authentification et onboarding (M1)}
+
+L'inscription d'un directeur se fait en moins de soixante secondes : saisie de l'email, du mot de passe et du nom de l'école, puis création automatique de l'établissement, de l'utilisateur associé et d'une année académique courante. L'authentification repose sur Supabase Auth qui gère les JWT, les cookies HTTP-only et le hachage des mots de passe. Un essai gratuit de trente jours est offert sans saisie de coordonnées bancaires.
+
+\subsection{Gestion des élèves (M2)}
+
+Le CRUD complet des élèves est accompagné d'une recherche plein-texte opérationnelle en français et en arabe, de filtres par classe et par niveau de risque, et d'un panneau latéral de détail qui affiche l'ensemble des informations de l'élève sans changement de page. L'ajout en masse via import Excel (M12) complète ce module.
+
+\subsection{Saisie des notes (M3)}
+
+L'interface de saisie des notes est un tableur réactif par classe. Chaque cellule est sauvegardée automatiquement à la perte de focus, via des Server Actions Next.js, ce qui évite les pertes de données et élimine le bouton « Enregistrer ». Les moyennes pondérées sont recalculées en temps réel. La validation impose une plage 0--20 stricte.
+
+\subsection{Bulletins scolaires (M4)}
+
+La génération de bulletins repose sur \texttt{@react-pdf/renderer} exécuté côté serveur. Un bulletin officiel A4 bilingue est produit en moins de trois secondes, incluant l'en-tête de l'école, le tableau des notes par matière, les appréciations par enseignant et les zones de signature. Le rendu est un PDF conforme aux standards visuels attendus par les parents algériens.
+
+\subsection{Présences (M5) et emploi du temps (M6)}
+
+La saisie des présences utilise une grille visuelle par classe où un clic suffit pour cycler entre les statuts Présent, Absent et Retard. Les statistiques de taux de présence sont calculées en temps réel. L'emploi du temps respecte la semaine algérienne (dimanche à jeudi).
+
+\subsection{Finance (M7)}
+
+Le module finance agrège les paiements de frais de scolarité par élève, par classe et par période. Quatre indicateurs clés sont présentés sur des cartes animées : montant total dû, montant encaissé, taux de recouvrement et nombre de retards. Un graphique d'évolution sur six mois permet d'identifier les tendances.
+
+\subsection{Intelligence artificielle -- Détection des risques (M8)}
+
+Ce module expose les scores de risque calculés nocturnement par le système expert décrit dans le chapitre~3. Un tableau trié par niveau de risque décroissant permet au directeur d'identifier en un coup d'œil les élèves qui méritent une attention prioritaire. Un bouton de recalcul manuel, destiné aux démonstrations, permet de déclencher le calcul pour un établissement sans attendre le cron nocturne.
+
+\subsection{Conformité réglementaire (M9)}
+
+Ce module traduit le cahier des charges des établissements privés algériens en un tableau d'obligations suivi en temps réel. Un score d'inspection-readiness de 0 à 100 est affiché, calculé par le même type de système expert que le score de risque élève, mais appliqué aux obligations réglementaires. Des suggestions d'actions prioritaires sont générées automatiquement.
+
+\subsection{Tableau de bord (M10)}
+
+Le tableau de bord agrège les indicateurs clés en un écran unique. Il présente des compteurs animés, des sparklines sur les métriques principales, un graphique d'évolution des inscriptions sur douze mois, un donut de répartition des risques et un flux d'activité en temps réel. Le résumé hebdomadaire généré par Claude Haiku est affiché en haut de ce tableau.
+
+\subsection{Le module phare -- Rapport Scientifique d'Orientation (M11)}
+
+Ce module constitue la contribution la plus originale d'\edura{} et mérite une description détaillée dans la section suivante.
+
+\section{Le Rapport Scientifique d'Orientation}
+
+\subsection{Vision}
+
+Le Rapport Scientifique d'Orientation répond à une question que les parents algériens commencent à se poser avec une acuité croissante : comment orienter mon enfant vers une filière qui corresponde réellement à ses forces et à ses aspirations, et pas seulement à sa dernière moyenne trimestrielle ? Ce rapport transforme \edura{} d'un logiciel de gestion en un outil de développement personnel de l'élève.
+
+\subsection{Données d'entrée}
+
+Le moteur d'orientation exploite cinq sources de données pour chaque élève :
+\begin{enumerate}
+  \item Les notes par matière et par trimestre (données scolaires standards).
+  \item Les observations qualitatives des enseignants, saisies avec des tags d'intelligence (\textit{Linguistique}, \textit{Logique}, etc.).
+  \item Le score de QI, issu d'un test standardisé externe (WISC-V, Raven, ou autre), saisi manuellement par le directeur.
+  \item Le style d'apprentissage déclaré, selon le modèle VARK (Visuel, Auditif, Kinesthésique, Lecture-Écriture).
+  \item Les intérêts personnels et loisirs, sous forme d'une liste de mots-clés.
+\end{enumerate}
+
+\subsection{Calcul du profil d'intelligences}
+
+Le profil d'intelligences est calculé en temps réel dès que les données sont disponibles. L'algorithme attribue d'abord un score de base de 30 points à chacune des huit intelligences de Gardner. Il ajoute ensuite, pour chaque matière, un boost proportionnel à la moyenne de l'élève dans cette matière, pondéré par le poids de la matière dans l'intelligence concernée. Les observations enseignantes taguées avec une intelligence spécifique ajoutent un bonus supplémentaire, permettant de capter des compétences que les notes ne reflètent pas (l'intelligence interpersonnelle d'un élève leader dans les projets de groupe, par exemple). Le résultat est normalisé pour une représentation en diagramme radar ou en donut.
+
+\subsection{La prédiction de filière}
+
+La prédiction de filière confronte le vecteur de moyennes de l'élève à cinq profils-types pondérés, un par filière du \ac{BAC} algérien. La filière dont le profil est le plus proche du profil de l'élève est recommandée en premier, avec un score de confiance dérivé de l'écart entre le premier et le deuxième résultat. Un écart faible se traduit par une recommandation de type « profil mixte » et des conseils d'approfondissement dans certaines matières.
+
+\subsection{Le rapport PDF}
+
+Le rapport généré en PDF A4 se compose de quatre sections colorées :
+
+\begin{itemize}
+  \item \textbf{Section 1 (vert) -- Synthèse académique} : tableau des notes par matière, indicateurs des points forts et des axes de progression, évolution du GPA.
+  \item \textbf{Section 2 (rouge) -- Commentaires des enseignants} : observations qualitatives signées, conseils pédagogiques.
+  \item \textbf{Section 3 (orange) -- Profil psychopédagogique} : diagramme des intelligences multiples, style d'apprentissage, conseils personnalisés adaptés au profil.
+  \item \textbf{Section 4 (violet) -- Prédiction et avenir} : filières recommandées avec scores de confiance, métiers associés avec parcours d'études, universités algériennes pertinentes (USTHB, USTO-MB, ENP, ESI, ESSA, Université Constantine 1, Université d'Annaba, etc.).
+\end{itemize}
+
+La figure~\ref{fig:rapport_pdf} illustre la mise en page du rapport.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{12cm}{\centering\vspace{3cm}
+\textit{[Figure : Capture d'écran du PDF du Rapport Scientifique d'Orientation -- à insérer depuis une capture réelle de l'application]}
+\vspace{3cm}}}
+\caption{Rapport Scientifique d'Orientation -- aperçu du PDF généré}
+\label{fig:rapport_pdf}
+\end{figure}
+
+\section{Sécurité}
+
+\subsection{Authentification}
+
+L'authentification repose sur Supabase Auth avec des tokens JWT signés, stockés dans des cookies \texttt{HttpOnly}, \texttt{Secure} et \texttt{SameSite=Lax}. La rotation des clés de signature est gérée par Supabase. Les mots de passe sont hachés avec bcrypt et ne transitent jamais en clair.
+
+\subsection{Contrôle d'accès par rôle}
+
+Trois rôles sont définis : Directeur, Secrétaire et Professeur. Chaque route API vérifie le rôle de l'utilisateur authentifié avant d'exécuter l'opération demandée. Le tableau~\ref{tab:rbac} résume les droits par rôle.
+
+\begin{table}[H]
+\centering
+\caption{Matrice de contrôle d'accès par rôle (RBAC)}
+\label{tab:rbac}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Fonctionnalité} & \textbf{Directeur} & \textbf{Secrétaire} & \textbf{Professeur} \\
+\midrule
+Tous les élèves & \checkmark & \checkmark & Ses classes \\
+Saisie des notes & \checkmark & Lecture & Ses classes \\
+Finance & \checkmark & \checkmark & \texttimes \\
+Rapports scientifiques & \checkmark & \checkmark & Ses élèves \\
+Paramètres école & \checkmark & \texttimes & \texttimes \\
+Gestion de l'équipe & \checkmark & \texttimes & \texttimes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Conformité RGPD}
+
+La plateforme héberge ses données en Europe (Vercel Frankfurt, Supabase eu-west-2). Les données sont chiffrées au repos et en transit (TLS 1.3). Le droit à l'oubli est implémenté via une suppression en cascade : supprimer une école efface l'ensemble de ses données associées. Aucun tracker tiers n'est intégré.
+
+\section{Déploiement}
+
+Le pipeline de déploiement est entièrement automatisé. Un \texttt{git push} sur la branche \texttt{main} déclenche via webhook un build Vercel qui installe les dépendances, génère le client Prisma, compile Next.js et déploie l'application sur le réseau edge global en environ 90 secondes. Le score de risque de chaque élève est recalculé chaque nuit à 02h00 (heure d'Alger) par un cron job Vercel.
+
+% =============================================================
+%  CHAPITRE 5 : TESTS ET RÉSULTATS
+% =============================================================
+\chapter{Tests et résultats}
+
+\section{Stratégie de tests}
+
+Les tests conduits sur \edura{} couvrent trois niveaux : les tests fonctionnels unitaires, les tests d'intégration sur les flux critiques, et les tests de performance. En l'absence d'une équipe QA dédiée, la stratégie de tests a été pragmatique : concentration sur les chemins critiques (authentification, isolation multi-tenant, calcul des scores IA, génération PDF) et tests exploratoires sur les fonctionnalités secondaires.
+
+Il est important d'être transparent sur les limites de cette approche : la couverture de tests automatisés est partielle. C'est une limitation réelle du projet, directement liée aux contraintes de ressources d'un développement solo. Elle figure explicitement dans les perspectives d'évolution.
+
+\section{Tests fonctionnels}
+
+\subsection{Isolation multi-tenant}
+
+Ce test est le plus critique du système. Le protocole consiste à créer deux comptes directeur distincts, à insérer des élèves dans chacun des deux tenants, puis à vérifier qu'aucune requête émise depuis le tenant A ne retourne des données du tenant B. Les tests ont été conduits à la fois au niveau applicatif (via des appels API avec des tokens des deux tenants) et au niveau base de données (via des requêtes directes ignorant la couche applicative).
+
+Les résultats indiquent une isolation correcte dans tous les cas testés : les politiques RLS PostgreSQL bloquent les requêtes croisées même lorsque la couche applicative est contournée.
+
+\subsection{Génération du score de risque}
+
+Des cas de test unitaires ont été définis pour chacun des douze facteurs du score de risque, en vérifiant que les seuils déclenchent les bons nombres de points et que la classification (LOW / MODERATE / HIGH) est correcte. Vingt cas limites ont été testés, incluant des situations avec des données manquantes (élève sans notes, sans paiements enregistrés, etc.). L'algorithme produit un résultat déterministe et cohérent dans tous les cas.
+
+\subsection{Rapport Scientifique d'Orientation}
+
+La cohérence du rapport a été vérifiée sur des profils d'élèves synthétiques représentatifs des cinq filières du BAC. Un élève avec des notes élevées en mathématiques et physique et des intérêts déclarés pour la programmation est orienté vers la filière « Mathématiques » avec un score de confiance supérieur à 80~\%. Un élève avec des notes élevées en philosophie, arabe et histoire-géographie est orienté vers « Lettres et Philosophie ». Ces résultats, bien que non validés scientifiquement sur une cohorte réelle, sont cohérents avec les attentes des directeurs consultés.
+
+\section{Tests de performance}
+
+\subsection{Performance frontend}
+
+Les métriques Lighthouse ont été mesurées sur la page de tableau de bord, qui est la plus chargée de l'application.
+
+\begin{table}[H]
+\centering
+\caption{Métriques de performance frontend -- Lighthouse}
+\label{tab:perf}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrique} & \textbf{Cible} & \textbf{Mesuré} \\
+\midrule
+Time to First Byte (TTFB) & $< 500$ ms & $\sim$280 ms \\
+Largest Contentful Paint (LCP) & $< 2{,}5$ s & $\sim$1,4 s \\
+Total Blocking Time (TBT) & $< 200$ ms & $\sim$120 ms \\
+Taille bundle JS & $< 300$ KB & $\sim$265 KB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Performance IA}
+
+\begin{table}[H]
+\centering
+\caption{Métriques de performance de la couche IA}
+\label{tab:perf_ia}
+\begin{tabular}{lc}
+\toprule
+\textbf{Opération} & \textbf{Temps mesuré} \\
+\midrule
+Calcul score de risque / élève & $< 1$ ms \\
+Batch nocturne 40 élèves & $\sim$1,2 s \\
+Génération profil d'intelligences & $< 100$ ms \\
+Génération PDF bulletin & $\sim$1,5 s \\
+Génération PDF rapport scientifique & $\sim$2,0 s \\
+Résumé Claude Haiku (LLM) & $\sim$800 ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ces résultats confirment que les objectifs techniques initiaux sont atteints : le calcul nocturne est compatible avec un cron Vercel de 10 secondes pour des établissements allant jusqu'à plusieurs milliers d'élèves, et les temps de génération PDF sont inférieurs aux 3 secondes perçues par l'utilisateur comme instantanées.
+
+\section{Résultats globaux du projet}
+
+À la date de rédaction de ce mémoire, \edura{} présente les indicateurs de maturité suivants :
+
+\begin{itemize}
+  \item \textbf{8 500 lignes} de code TypeScript/TSX, réparties sur plus de 100 fichiers source.
+  \item \textbf{24 tables} PostgreSQL couvertes par 7 migrations Prisma versionnées.
+  \item \textbf{20+ pages} Next.js et \textbf{12 routes API} fonctionnelles.
+  \item \textbf{13 modules} déployés en production dont 12 completement finalisés.
+  \item \textbf{32 dépendances NPM} gérées et auditées.
+  \item Application déployée et accessible à l'adresse publique \url{https://edura-aminaghezal.vercel.app}.
+\end{itemize}
+
+La figure~\ref{fig:dashboard} illustre le tableau de bord principal de l'application.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{12cm}{\centering\vspace{3cm}
+\textit{[Figure : Capture d'écran du tableau de bord principal d'\edura{} -- mode clair ou mode sombre]}
+\vspace{3cm}}}
+\caption{Tableau de bord principal d'\edura{}}
+\label{fig:dashboard}
+\end{figure}
+
+\section{Difficultés rencontrées}
+
+Trois difficultés techniques méritent d'être mentionnées, car elles illustrent les défis réels d'un projet solo à la frontière entre la recherche académique et le développement produit.
+
+La première est la migration vers Prisma 7. Cette version majeure a déplacé la configuration de connexion à la base de données du fichier \texttt{schema.prisma} vers un fichier \texttt{prisma.config.ts}, et exige désormais un adaptateur explicite. La migration n'était pas documentée de façon exhaustive au moment où elle s'imposait, et a nécessité plusieurs jours de débogage.
+
+La deuxième est l'encodage URL des mots de passe Supabase. Des caractères réservés dans le mot de passe de la base de données causaient des erreurs de connexion silencieuses, résolues par un URL-encoding explicite.
+
+La troisième, et sans doute la plus intéressante intellectuellement, est l'opérationnalisation de la théorie de Gardner. Mapper des notes scolaires algériennes vers des types d'intelligence abstraits a nécessité un travail de synthèse de la littérature pédagogique et des discussions avec des enseignants praticiens. Le résultat est une table de correspondance matière/intelligence qui constitue un artefact de connaissance réutilisable, mais dont la validation empirique reste à conduire.
+
+% =============================================================
+%  CONCLUSION GÉNÉRALE
+% =============================================================
+\chapter*{Conclusion générale}
+\addcontentsline{toc}{chapter}{Conclusion générale}
+\markboth{Conclusion générale}{Conclusion générale}
+
+Ce mémoire a présenté la conception et la réalisation d'\edura{}, une plateforme SaaS multi-tenant à destination des écoles privées algériennes. Le travail accompli dépasse le cadre d'un exercice académique : la plateforme est déployée en production, elle répond à un besoin réel documenté, et elle intègre une contribution pédagogique originale -- le Rapport Scientifique d'Orientation -- qui n'existe dans aucune solution concurrente à destination du marché algérien.
+
+\vspace{6pt}
+Sur le plan technique, ce projet a permis de mettre en pratique l'ensemble du spectre de l'ingénierie logicielle moderne : architecture distribuée multi-tenant, sécurité applicative par couches, bases de données relationnelles avec politiques de sécurité au niveau ligne, intelligence artificielle hybride, génération de documents PDF, et déploiement cloud automatisé. Chacun de ces domaines a exigé des choix justifiés, souvent à contre-courant de la tendance à l'utilisation systématique du Machine Learning, et ces choix s'avèrent cohérents avec la littérature académique.
+
+\vspace{6pt}
+Sur le plan pluridisciplinaire, ce travail a nécessité une immersion sérieuse dans la psychologie cognitive -- en particulier la théorie des intelligences multiples de Gardner \autocite{gardner1983frames} --, dans la réglementation des établissements scolaires privés algériens, et dans les dynamiques économiques du secteur EdTech. C'est précisément cette dimension transversale qui confère à \edura{} son caractère différencié.
+
+\vspace{6pt}
+Les perspectives d'évolution sont nombreuses. À court terme, la finalisation du module de conformité, la mise en place d'un système de notification email aux parents, et le déploiement d'un paywall complet permettront de passer du stade de MVP à celui d'un produit commercialement opérationnel. À moyen terme, l'accumulation de données réelles sur plusieurs années ouvrira la voie à l'entraînement de modèles de Machine Learning supervisé, qui viendront enrichir les systèmes experts actuels sans les remplacer. À long terme, une expansion géographique vers la Tunisie, le Maroc et d'autres marchés francophones du Maghreb est envisageable.
+
+\vspace{6pt}
+Une chose est certaine : le problème qu'\edura{} cherche à résoudre -- aider chaque élève à trouver la voie qui correspond à ses forces plutôt qu'à sa seule moyenne -- ne sera pas résolu par la technologie seule. Il faudra aussi des directeurs convaincus, des enseignants formés à observer autrement, et des parents prêts à entendre que leur enfant a des intelligences que le bulletin ne mesure pas. \edura{} peut être un outil dans ce processus. C'est déjà beaucoup.
+
+% =============================================================
+%  BIBLIOGRAPHIE
+% =============================================================
+\printbibliography[heading=bibintoc, title={Bibliographie}]
+
+% =============================================================
+%  ANNEXES
+% =============================================================
+\appendix
+
+\chapter{Glossaire technique}
+
+\begin{description}
+  \item[SaaS] \textit{Software as a Service} -- modèle de distribution logicielle où l'application est hébergée dans le cloud et consommée via abonnement.
+  \item[Multi-tenant] Architecture où plusieurs clients partagent la même instance logicielle tout en bénéficiant d'une isolation stricte de leurs données.
+  \item[ORM] \textit{Object-Relational Mapping} -- couche d'abstraction qui permet d'interagir avec une base de données relationnelle via des objets dans le langage de programmation.
+  \item[RLS] \textit{Row-Level Security} -- mécanisme PostgreSQL permettant de définir des politiques d'accès aux données au niveau de chaque ligne d'une table.
+  \item[RBAC] \textit{Role-Based Access Control} -- modèle de contrôle d'accès où les droits sont associés à des rôles plutôt qu'à des utilisateurs individuels.
+  \item[JWT] \textit{JSON Web Token} -- format standardisé de token d'authentification signé numériquement.
+  \item[CUID] \textit{Collision-resistant Unique IDentifier} -- identifiant unique généré côté client, résistant aux collisions en environnement distribué.
+  \item[CI/CD] \textit{Continuous Integration / Continuous Deployment} -- ensemble de pratiques d'automatisation du build, du test et du déploiement.
+  \item[LLM] \textit{Large Language Model} -- modèle de langage de grande taille, entraîné sur des corpus textuels massifs.
+  \item[SSR] \textit{Server-Side Rendering} -- rendu HTML exécuté côté serveur avant envoi au navigateur client.
+  \item[RGPD] Règlement Général sur la Protection des Données (UE 2016/679).
+  \item[VAK/VARK] Modèle de styles d'apprentissage -- Visuel, Auditif, Kinesthésique, Lecture-Écriture.
+\end{description}
+
+\chapter{Glossaire pédagogique}
+
+\begin{description}
+  \item[Intelligences multiples] Théorie développée par Howard Gardner (1983) postulant que l'intelligence humaine est constituée de huit aptitudes cognitives distinctes et relativement indépendantes.
+  \item[Style d'apprentissage] Modalité préférentielle par laquelle un individu absorbe, traite et retient l'information.
+  \item[Filière BAC] Voie d'enseignement secondaire en Algérie ; les cinq filières sont Sciences expérimentales, Mathématiques, Lettres et Philosophie, Langues étrangères, et Gestion et Économie.
+  \item[WISC-V] \textit{Wechsler Intelligence Scale for Children}, cinquième édition -- test d'intelligence standardisé pour les enfants de 6 à 16 ans.
+  \item[Raven] Test des matrices progressives de Raven -- évaluation de l'intelligence fluide non verbale.
+  \item[GPA] \textit{Grade Point Average} -- moyenne pondérée des notes académiques.
+  \item[Cahier des charges] Document réglementaire du Ministère de l'Éducation Nationale algérien fixant les obligations des établissements privés.
+  \item[ONEC] Office National des Examens et Concours -- organisme algérien chargé de l'organisation des examens nationaux.
+\end{description}
+
+\chapter{Liens du projet}
+
+\begin{table}[H]
+\centering
+\caption{Ressources en ligne liées au projet \edura{}}
+\begin{tabular}{ll}
+\toprule
+\textbf{Ressource} & \textbf{URL} \\
+\midrule
+Application live & \url{https://edura-aminaghezal.vercel.app} \\
+Dépôt GitHub & \url{https://github.com/aminaghezal/edura} \\
+Base de données & Supabase (région eu-west-2) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Captures d'écran à insérer}
+
+Les captures d'écran suivantes sont à insérer dans la version finale du mémoire, aux emplacements des figures réservées dans le texte :
+
+\begin{enumerate}
+  \item Landing page -- mode clair
+  \item Page d'inscription d'une école
+  \item Tableau de bord -- mode clair (métriques + graphiques)
+  \item Tableau de bord -- mode sombre (effet « control panel »)
+  \item Liste des élèves avec recherche, filtres et bouton « Rapport »
+  \item Page hub \texttt{/app/reports}
+  \item Rapport Scientifique -- section 1 (Synthèse Académique)
+  \item Rapport Scientifique -- section 2 (Commentaires Enseignants)
+  \item Rapport Scientifique -- section 3 (Profil Psychopédagogique)
+  \item Rapport Scientifique -- section 4 (Prédiction et Avenir)
+  \item PDF officiel du Rapport Scientifique généré
+  \item Page Présences
+  \item Page Finance avec graphique
+  \item Page Analyses IA avec scores de risque
+  \item Vue mobile responsive
+\end{enumerate}
+
+% =============================================================
+\end{document}

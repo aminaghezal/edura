@@ -14,6 +14,8 @@ import {
   TrendingDown,
   Minus,
   ArrowLeft,
+  Lightbulb,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -360,22 +362,23 @@ export function ReportClient({
           PRINTABLE REPORT BODY — reproduit la maquette officielle
           ════════════════════════════════════════════════════════════ */}
       <div id="report-printable" className="space-y-4">
-        {/* HEADER — Algerian Ministry style */}
-        <Card className="overflow-hidden border-2 border-slate-200">
-          <CardContent className="p-6 bg-gradient-to-r from-emerald-50 via-white to-emerald-50">
+        {/* HEADER — EDURA Institution style */}
+        <Card className="overflow-hidden border-2 border-indigo-200">
+          <CardContent className="p-6 bg-gradient-to-r from-indigo-50 via-white to-purple-50">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-xl bg-emerald-600 text-white grid place-items-center text-xs font-bold leading-tight">
-                  DZ
-                  <br />
-                  ÉCOLE
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 text-white grid place-items-center font-extrabold leading-tight shadow-md shadow-indigo-500/30">
+                  <div className="text-center">
+                    <div className="text-[9px] opacity-80">EDURA</div>
+                    <div className="text-[7px] opacity-60 -mt-0.5">v1.0</div>
+                  </div>
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-emerald-900">
-                    وزارة التربية الوطنية
+                  <div className="text-xs font-bold text-indigo-900">
+                    منصة إيدورا — التربية الذكية
                   </div>
                   <div className="text-xs text-slate-600">
-                    Ministère de l&apos;Éducation Nationale
+                    EDURA — Plateforme Intelligente de Gestion Scolaire
                   </div>
                   <div className="text-[10px] text-slate-500 mt-0.5">
                     {school.name} — {school.wilaya}
@@ -384,7 +387,7 @@ export function ReportClient({
               </div>
 
               <div className="text-center flex-1">
-                <div className="text-xs text-emerald-700 font-bold">
+                <div className="text-xs text-indigo-700 font-bold">
                   التقرير العلمي الشامل للطالب
                 </div>
                 <div className="text-lg font-extrabold text-slate-900 mt-1">
@@ -392,6 +395,9 @@ export function ReportClient({
                 </div>
                 <div className="text-xs text-slate-600 mt-0.5">
                   Bilan Pédagogique et d&apos;Orientation Complet
+                </div>
+                <div className="text-[10px] text-indigo-500 mt-1 italic">
+                  « Révélons les talents, construisons l&apos;avenir »
                 </div>
               </div>
 
@@ -523,6 +529,18 @@ export function ReportClient({
           </div>
         </ReportSection>
 
+        <InterpretationBox title="Comment lire cette section ?" color="emerald">
+          <p>
+            <strong>Le GPA</strong> (Grade Point Average) est la moyenne générale de l&apos;élève sur 20. Un GPA supérieur à 14/20 indique de bons résultats ; entre 10 et 14/20, des résultats moyens ; en dessous de 10/20, un soutien est recommandé.
+          </p>
+          <p>
+            <strong>La courbe de progression</strong> montre l&apos;évolution trimestre par trimestre. Une courbe ascendante signale une amélioration ; descendante, un essoufflement à surveiller.
+          </p>
+          <p>
+            <strong>Les matières fortes</strong> révèlent les domaines d&apos;excellence — précieux pour orienter l&apos;élève. Les matières faibles indiquent où concentrer le soutien scolaire.
+          </p>
+        </InterpretationBox>
+
         {/* ─── Section 2: COMMENTAIRES DES ENSEIGNANTS (red) ─── */}
         <ReportSection
           number={2}
@@ -572,6 +590,18 @@ export function ReportClient({
             </div>
           )}
         </ReportSection>
+
+        <InterpretationBox title="Pourquoi les observations des enseignants sont importantes ?" color="red">
+          <p>
+            <strong>Les observations qualitatives</strong> capturent ce que les notes ne disent pas : comportement, motivation, leadership, créativité, capacité d&apos;écoute, esprit d&apos;équipe.
+          </p>
+          <p>
+            Chaque enseignant peut <strong>tagger les intelligences observées</strong> (Linguistique, Logique, Interpersonnelle, etc.) — ces tags enrichissent automatiquement le profil psychopédagogique calculé en section 3.
+          </p>
+          <p>
+            <strong>Pour les parents</strong> : ces commentaires sont précieux pour comprendre votre enfant au-delà des notes et orienter les discussions à la maison.
+          </p>
+        </InterpretationBox>
 
         {/* ─── Section 3: PROFIL PSYCHOPÉDAGOGIQUE (orange) ─── */}
         <ReportSection
@@ -684,6 +714,21 @@ export function ReportClient({
           </div>
         </ReportSection>
 
+        <InterpretationBox title="Que signifie ce profil psychopédagogique ?" color="amber">
+          <p>
+            <strong>Les intelligences multiples (Howard Gardner, Harvard, 1983)</strong> postulent que l&apos;intelligence n&apos;est pas unique mais multi-dimensionnelle. Il existe 8 types d&apos;intelligence — chacun de nous combine ces 8 dimensions à des degrés variables.
+          </p>
+          <p>
+            <strong>Le graphique en donut</strong> montre les 5 intelligences dominantes de l&apos;élève. Plus la part est grande, plus cette intelligence est développée. <em>Exemple : une dominance Logique-Mathématique = profil scientifique ; une dominance Linguistique = profil littéraire ou langues.</em>
+          </p>
+          <p>
+            <strong>Le style d&apos;apprentissage</strong> (Visuel, Auditif, Kinesthésique, Lecture-Écriture) — modèle <strong>VAK/RW</strong> (Fleming, 1995) — indique comment l&apos;élève absorbe le mieux l&apos;information. C&apos;est crucial pour les parents et enseignants : un élève visuel comprend mieux avec des schémas ; un kinesthésique, en pratiquant.
+          </p>
+          <p>
+            <strong>Les conseils personnalisés</strong> sont générés algorithmiquement à partir de l&apos;intelligence dominante détectée + des matières faibles + de la tendance des notes. Ils sont à discuter avec l&apos;enfant.
+          </p>
+        </InterpretationBox>
+
         {/* ─── Section 4: PRÉDICTION ET AVENIR (purple) ─── */}
         <ReportSection
           number={4}
@@ -762,6 +807,134 @@ export function ReportClient({
           </div>
         </ReportSection>
 
+        <InterpretationBox title="Comment interpréter la prédiction d'orientation ?" color="purple">
+          <p>
+            <strong>Les filières recommandées</strong> sont classées par <strong>score de confiance (%)</strong> — calculé à partir de la pondération des matières clés de chaque filière du BAC algérien. <em>Exemple : Sciences Expérimentales privilégie SVT (35%), Physique (30%), Maths (25%).</em>
+          </p>
+          <p>
+            <strong>Plus le pourcentage est élevé</strong>, plus l&apos;adéquation entre les performances actuelles de l&apos;élève et les exigences de la filière est forte. Un score &gt; 75% indique une voie naturelle ; entre 60% et 75%, une voie possible avec adaptation ; en dessous, mieux vaut explorer d&apos;autres pistes.
+          </p>
+          <p>
+            <strong>Les perspectives de carrière</strong> listent des métiers concrets avec les parcours d&apos;études en Algérie. <strong>Les universités suggérées</strong> sont des établissements publics réputés dans le domaine choisi (USTHB, USTO-MB Oran, ENP, ESI, etc.).
+          </p>
+          <p>
+            <strong>Important pour les parents</strong> : cette analyse est un <em>outil d&apos;aide à la décision</em>, pas une sentence. La motivation et les rêves de l&apos;enfant restent primordiaux.
+          </p>
+        </InterpretationBox>
+
+        {/* ── EDURA Institution Tridimensionnelle ── */}
+        <Card className="overflow-hidden border-2 border-slate-300 bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+          <div className="bg-gradient-to-r from-slate-800 to-indigo-900 text-white px-5 py-3">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5" />
+              <div>
+                <div className="font-bold text-sm tracking-wide">
+                  PERSPECTIVES D&apos;ÉVOLUTION & VISION FUTURISTE
+                </div>
+                <div className="text-xs opacity-80">L&apos;ÉCOSYSTÈME EDURA — Au-delà du cadre scolaire</div>
+              </div>
+            </div>
+          </div>
+
+          <CardContent className="p-5 space-y-5">
+            {/* 1. Éducation Tridimensionnelle */}
+            <div>
+              <h4 className="font-bold text-sm text-indigo-900 mb-2">
+                1. L&apos;ÉDUCATION TRIDIMENSIONNELLE : Au-delà du cadre académique
+              </h4>
+              <p className="text-xs text-slate-700 leading-relaxed mb-3">
+                Le système éducatif conventionnel se limite à une évaluation unidimensionnelle basée sur la mémorisation. Le bilan scientifique d&apos;EDURA marque une rupture paradigmatique en introduisant une approche holistique fusionnant <strong>trois dimensions critiques</strong> :
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="p-3 rounded-lg border-l-4 border-indigo-500 bg-indigo-50/50">
+                  <div className="text-[10px] uppercase font-bold tracking-wide text-indigo-700">Académique</div>
+                  <div className="text-xs mt-1 leading-snug">Les résultats factuels (notes, moyennes, progression)</div>
+                </div>
+                <div className="p-3 rounded-lg border-l-4 border-purple-500 bg-purple-50/50">
+                  <div className="text-[10px] uppercase font-bold tracking-wide text-purple-700">Psychologique</div>
+                  <div className="text-xs mt-1 leading-snug">Le profil de personnalité et les neurosciences cognitives (Gardner)</div>
+                </div>
+                <div className="p-3 rounded-lg border-l-4 border-amber-500 bg-amber-50/50">
+                  <div className="text-[10px] uppercase font-bold tracking-wide text-amber-700">Potentiel</div>
+                  <div className="text-xs mt-1 leading-snug">Les aptitudes innées et les projections de carrière</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Institution incubateur */}
+            <div>
+              <h4 className="font-bold text-sm text-indigo-900 mb-2">
+                2. L&apos;INSTITUTION EDURA : Un incubateur de talents pour tous
+              </h4>
+              <p className="text-xs text-slate-700 leading-relaxed mb-3">
+                Les données récoltées ne doivent pas rester théoriques. <strong>L&apos;Institution EDURA</strong> intervient comme prolongement opérationnel : un programme d&apos;enrichissement ouvert à l&apos;ensemble de la population étudiante, partant du postulat scientifique que <em>chaque élève est doté d&apos;une « zone de génie » spécifique</em>.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="p-3 rounded-lg bg-white border">
+                  <div className="text-[10px] uppercase font-bold tracking-wide text-blue-700">
+                    Pôle Technologique & Scientifique
+                  </div>
+                  <ul className="text-xs mt-1 leading-snug text-slate-600 list-disc pl-3 space-y-0.5">
+                    <li>Immersion en ingénierie</li>
+                    <li>Codage applicatif, Robotique (Arduino)</li>
+                    <li>Initiation médicale</li>
+                    <li>Sciences environnementales</li>
+                  </ul>
+                </div>
+                <div className="p-3 rounded-lg bg-white border">
+                  <div className="text-[10px] uppercase font-bold tracking-wide text-emerald-700">
+                    Pôle Économique & Management
+                  </div>
+                  <ul className="text-xs mt-1 leading-snug text-slate-600 list-disc pl-3 space-y-0.5">
+                    <li>Incubation entrepreneuriale précoce</li>
+                    <li>Littératie financière</li>
+                    <li>Gestion de projet</li>
+                    <li>Sciences de l&apos;éducation</li>
+                  </ul>
+                </div>
+                <div className="p-3 rounded-lg bg-white border">
+                  <div className="text-[10px] uppercase font-bold tracking-wide text-pink-700">
+                    Pôle Humain & Créatif
+                  </div>
+                  <ul className="text-xs mt-1 leading-snug text-slate-600 list-disc pl-3 space-y-0.5">
+                    <li>Intelligences interpersonnelles et spatiales</li>
+                    <li>Arts plastiques & Musicologie</li>
+                    <li>Analyse géographique</li>
+                    <li>Sport de performance</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Alignement neuropédagogique */}
+            <div>
+              <h4 className="font-bold text-sm text-indigo-900 mb-2">
+                3. ALIGNEMENT NEUROPÉDAGOGIQUE : La méthodologie d&apos;apprentissage
+              </h4>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                Les cours ne sont pas enseignés de manière uniforme. Les experts conçoivent des formats pédagogiques calqués sur les types d&apos;intelligence validés par nos psycho-analystes.
+                <br />
+                <em className="text-slate-500">
+                  Exemple : un profil visuo-spatial avec intérêt entrepreneurial recevra les concepts de gestion via la modélisation graphique. Un profil linguistique abordera la finance par la rhétorique de négociation.
+                </em>
+              </p>
+            </div>
+
+            {/* 4. Vision avenir */}
+            <div className="p-4 rounded-lg bg-gradient-to-r from-indigo-900 to-purple-900 text-white">
+              <h4 className="font-bold text-sm mb-2">
+                4. UNE VISION D&apos;AVENIR POUR LA JEUNESSE ALGÉRIENNE
+              </h4>
+              <p className="text-xs leading-relaxed">
+                En connectant les écoles privées partenaires à cette institution d&apos;élite, EDURA dessine les contours de l&apos;<strong>école de demain en Algérie</strong>. Nous ne formons pas des exécutants conformes à un programme rigide ; nous révélons des esprits agiles, psychologiquement équilibrés, conscients de leurs forces et armés techniquement pour devenir les leaders, ingénieurs, artistes et entrepreneurs de l&apos;économie de la connaissance.
+              </p>
+              <div className="mt-3 pt-3 border-t border-white/20 text-xs italic text-center">
+                « Chaque enfant porte en lui un génie. Notre mission est de l&apos;activer. »
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-2 pb-4 print:pt-6">
           Document généré automatiquement par EDURA — {new Date(report.meta.generatedAt).toLocaleString("fr-FR")}
@@ -835,5 +1008,45 @@ function ReportSection({
       </div>
       <CardContent className="p-5">{children}</CardContent>
     </Card>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Interpretation Box — vulgarisation des concepts scientifiques pour
+// les parents et personnels non spécialisés
+// ──────────────────────────────────────────────────────────────────────
+
+function InterpretationBox({
+  title,
+  children,
+  color = "blue",
+}: {
+  title: string;
+  children: React.ReactNode;
+  color?: "blue" | "emerald" | "red" | "amber" | "purple";
+}) {
+  const colors = {
+    blue: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600", title: "text-blue-900" },
+    emerald: { bg: "bg-emerald-50", border: "border-emerald-200", icon: "text-emerald-600", title: "text-emerald-900" },
+    red: { bg: "bg-red-50", border: "border-red-200", icon: "text-red-600", title: "text-red-900" },
+    amber: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-700", title: "text-amber-900" },
+    purple: { bg: "bg-purple-50", border: "border-purple-200", icon: "text-purple-600", title: "text-purple-900" },
+  };
+  const c = colors[color];
+
+  return (
+    <div className={`${c.bg} border ${c.border} rounded-lg p-4 mt-3`}>
+      <div className="flex items-start gap-3">
+        <Lightbulb className={`w-5 h-5 ${c.icon} flex-shrink-0 mt-0.5`} />
+        <div className="flex-1">
+          <div className={`text-xs font-bold uppercase tracking-wide ${c.title} mb-1.5`}>
+            💡 {title}
+          </div>
+          <div className="text-xs text-slate-700 leading-relaxed space-y-1.5">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

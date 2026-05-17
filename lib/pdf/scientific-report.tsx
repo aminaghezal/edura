@@ -1,8 +1,10 @@
 /**
- * EDURA — Scientific Student Report PDF
+ * EDURA — Scientific Student Report PDF (4 pages)
  *
- * Reproduces the official "Bilan Pédagogique et d'Orientation Complet"
- * layout from the design mockup, formatted for A4 paper.
+ * Page 1 : Cover + Synthèse Académique + Commentaires Enseignants
+ * Page 2 : Profil Psychopédagogique (intelligences + style apprentissage + conseils)
+ * Page 3 : Prédiction Orientation + Métiers + Universités algériennes détaillées
+ * Page 4 : Vision EDURA — Institution Tridimensionnelle
  */
 
 import {
@@ -11,91 +13,156 @@ import {
   Text,
   View,
   StyleSheet,
+  Svg,
+  Rect,
+  Circle,
+  Path,
+  G,
 } from "@react-pdf/renderer";
 import type { ScientificReport } from "@/lib/orientation/profile";
 
 const COLORS = {
   emerald: "#16A34A",
+  emeraldDark: "#15803D",
   red: "#DC2626",
+  redDark: "#B91C1C",
   amber: "#F59E0B",
+  amberDark: "#D97706",
   purple: "#9333EA",
+  purpleDark: "#7E22CE",
+  indigo: "#4F46E5",
+  indigoDark: "#3730A3",
   text: "#0F172A",
   muted: "#64748B",
+  mutedLight: "#94A3B8",
   border: "#E2E8F0",
   bg: "#F8FAFC",
+  white: "#FFFFFF",
 };
 
 const styles = StyleSheet.create({
   page: {
     padding: 28,
+    paddingBottom: 36,
     fontSize: 9,
     fontFamily: "Helvetica",
     color: COLORS.text,
   },
-  // Header
-  header: {
+  // ──── COVER HEADER ────
+  coverHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 14,
+    padding: 12,
+    backgroundColor: "#EEF2FF",
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: COLORS.indigo,
+  },
+  brandBox: {
+    width: 56,
+    height: 56,
+    backgroundColor: COLORS.indigo,
+    borderRadius: 8,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
-    padding: 10,
-    backgroundColor: "#F0FDF4",
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
+    color: COLORS.white,
   },
-  brandLogo: {
-    width: 42,
-    height: 42,
-    backgroundColor: COLORS.emerald,
-    color: "#fff",
-    fontSize: 8,
-    fontWeight: 700,
-    padding: 6,
-    borderRadius: 6,
-    textAlign: "center",
-  },
-  title: {
-    fontSize: 11,
+  brandText: {
+    color: COLORS.white,
+    fontSize: 10,
     fontWeight: 700,
     textAlign: "center",
   },
-  subtitle: {
+  brandSub: {
+    color: COLORS.white,
+    fontSize: 6,
+    opacity: 0.8,
+    marginTop: 1,
+  },
+  reportTitleBox: {
+    flex: 1,
+    paddingLeft: 12,
+    textAlign: "center",
+  },
+  reportTitleAr: {
+    fontSize: 9,
+    fontWeight: 700,
+    color: COLORS.indigoDark,
+    textAlign: "center",
+  },
+  reportTitle: {
+    fontSize: 13,
+    fontWeight: 700,
+    marginTop: 3,
+    textAlign: "center",
+  },
+  reportSubtitle: {
     fontSize: 8,
     color: COLORS.muted,
+    marginTop: 2,
     textAlign: "center",
   },
-  // Sections
+  reportMotto: {
+    fontSize: 7,
+    fontStyle: "italic",
+    color: COLORS.indigo,
+    marginTop: 4,
+    textAlign: "center",
+  },
+  studentInfoBox: {
+    width: 150,
+    padding: 8,
+    backgroundColor: COLORS.white,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  studentInfoRow: { fontSize: 8, marginBottom: 2 },
+  studentInfoLabel: { color: COLORS.muted, fontSize: 7 },
+  studentInfoValue: { fontWeight: 700, fontSize: 9 },
+
+  // ──── SECTION BANNERS ────
   sectionBanner: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "6 10",
-    marginTop: 10,
+    padding: "7 10",
+    marginTop: 12,
     marginBottom: 6,
+    borderRadius: 4,
   },
   sectionBannerText: {
-    color: "#fff",
+    color: COLORS.white,
     fontSize: 10,
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  sectionBannerTextAr: {
+    color: COLORS.white,
+    fontSize: 8,
+    fontWeight: 700,
+    opacity: 0.85,
+  },
   sectionNumber: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "rgba(255,255,255,0.3)",
-    color: "#fff",
-    fontSize: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    color: COLORS.white,
+    fontSize: 10,
     fontWeight: 700,
     textAlign: "center",
-    padding: 3,
-    marginRight: 6,
+    paddingTop: 3,
+    marginRight: 8,
   },
-  // Generic
+
+  // ──── GENERIC ────
   row: { flexDirection: "row" },
   col: { flex: 1 },
+  twoCol: { flex: 1, marginRight: 8 },
   subheading: {
     fontSize: 9,
     fontWeight: 700,
@@ -103,16 +170,24 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 8,
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
+  textSmall: { fontSize: 7, lineHeight: 1.4 },
   muted: { color: COLORS.muted, fontSize: 8 },
   bold: { fontWeight: 700 },
-  // Observation cards
+
+  // ──── CARDS ────
+  card: {
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
   obsCard: {
-    padding: 6,
+    padding: 8,
     backgroundColor: "#FEF2F2",
     borderLeftWidth: 3,
     borderLeftColor: COLORS.red,
+    borderRadius: 4,
     marginBottom: 4,
   },
   obsTitle: {
@@ -129,27 +204,154 @@ const styles = StyleSheet.create({
     marginTop: 3,
     textAlign: "right",
   },
+
+  // ──── INTERPRETATION BOXES ────
+  interpretBox: {
+    padding: 7,
+    borderRadius: 4,
+    marginTop: 4,
+    marginBottom: 6,
+    borderWidth: 1,
+  },
+  interpretTitle: {
+    fontSize: 7,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+    marginBottom: 3,
+  },
+  interpretText: { fontSize: 7, lineHeight: 1.4 },
+
+  // ──── INTELLIGENCE BARS ────
+  intelligenceBar: {
+    height: 8,
+    backgroundColor: "#FEF3C7",
+    borderRadius: 4,
+    marginTop: 2,
+    overflow: "hidden",
+  },
+  intelligenceFill: {
+    height: 8,
+    borderRadius: 4,
+  },
+
+  // ──── ORIENTATION ────
   filiereCard: {
-    padding: 6,
+    padding: 8,
     backgroundColor: "#FAF5FF",
     borderLeftWidth: 3,
     borderLeftColor: COLORS.purple,
-    marginBottom: 4,
+    borderRadius: 4,
+    marginBottom: 5,
+  },
+  filiereHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 3,
+  },
+  confidenceBadge: {
+    backgroundColor: COLORS.purple,
+    color: COLORS.white,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    fontSize: 7,
+    fontWeight: 700,
   },
   careerCard: {
-    padding: 5,
-    backgroundColor: "#fff",
+    padding: 6,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: "#E9D5FF",
     borderRadius: 4,
-    marginBottom: 3,
+    marginBottom: 4,
   },
+  universityPill: {
+    backgroundColor: "#F3E8FF",
+    color: COLORS.purpleDark,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    fontSize: 7,
+    fontWeight: 700,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+
+  // ──── VISION PAGE ────
+  visionHeader: {
+    backgroundColor: COLORS.indigoDark,
+    color: COLORS.white,
+    padding: 14,
+    marginBottom: 12,
+    borderRadius: 6,
+  },
+  visionTitle: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: COLORS.white,
+  },
+  visionSubtitle: {
+    fontSize: 9,
+    color: COLORS.white,
+    opacity: 0.85,
+    marginTop: 4,
+  },
+  visionMotto: {
+    fontSize: 9,
+    fontStyle: "italic",
+    color: COLORS.amber,
+    marginTop: 8,
+  },
+  visionSection: {
+    marginBottom: 14,
+  },
+  visionSectionTitle: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: COLORS.indigoDark,
+    marginBottom: 5,
+  },
+  poleBox: {
+    flex: 1,
+    padding: 8,
+    borderRadius: 4,
+    marginRight: 4,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  poleTitle: {
+    fontSize: 8,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+  poleBullet: {
+    fontSize: 7,
+    marginBottom: 2,
+    paddingLeft: 8,
+  },
+  dimensionCard: {
+    flex: 1,
+    padding: 8,
+    borderRadius: 4,
+    marginRight: 4,
+    borderLeftWidth: 3,
+  },
+  dimensionLabel: {
+    fontSize: 7,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  dimensionDesc: { fontSize: 7, marginTop: 3, lineHeight: 1.3 },
+
+  // ──── FOOTER ────
   footer: {
     position: "absolute",
-    bottom: 18,
+    bottom: 14,
     left: 28,
     right: 28,
     fontSize: 7,
@@ -160,6 +362,10 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
   },
 });
+
+// ──────────────────────────────────────────────────────────────────────
+// Helper components
+// ──────────────────────────────────────────────────────────────────────
 
 function SectionBanner({
   n,
@@ -178,12 +384,80 @@ function SectionBanner({
         <Text style={styles.sectionNumber}>{n}</Text>
         <Text style={styles.sectionBannerText}>{title}</Text>
       </View>
-      <Text style={[styles.sectionBannerText, { fontSize: 8, opacity: 0.85 }]}>
-        {titleAr}
-      </Text>
+      <Text style={styles.sectionBannerTextAr}>{titleAr}</Text>
     </View>
   );
 }
+
+function InterpretBox({
+  title,
+  text,
+  borderColor,
+  bg,
+  titleColor,
+}: {
+  title: string;
+  text: string;
+  borderColor: string;
+  bg: string;
+  titleColor: string;
+}) {
+  return (
+    <View style={[styles.interpretBox, { backgroundColor: bg, borderColor: borderColor }]}>
+      <Text style={[styles.interpretTitle, { color: titleColor }]}>
+        Pour mieux comprendre : {title}
+      </Text>
+      <Text style={styles.interpretText}>{text}</Text>
+    </View>
+  );
+}
+
+// Simple line chart SVG for GPA trend
+function GpaSparkline({ data, width = 200, height = 60 }: {
+  data: { trimester: number; gpa: number }[];
+  width?: number;
+  height?: number;
+}) {
+  if (data.length < 2) return null;
+  const maxGpa = 20;
+  const padding = 8;
+  const innerW = width - padding * 2;
+  const innerH = height - padding * 2;
+  const step = innerW / (data.length - 1);
+
+  const points = data.map((d, i) => ({
+    x: padding + i * step,
+    y: padding + innerH - (d.gpa / maxGpa) * innerH,
+  }));
+
+  const path = points
+    .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
+    .join(" ");
+
+  return (
+    <Svg width={width} height={height}>
+      {/* Grid line at 10/20 (passing threshold) */}
+      <G>
+        <Path
+          d={`M ${padding} ${padding + innerH * 0.5} L ${width - padding} ${padding + innerH * 0.5}`}
+          stroke="#E2E8F0"
+          strokeWidth={0.5}
+          strokeDasharray="3 3"
+        />
+      </G>
+      {/* GPA line */}
+      <Path d={path} stroke={COLORS.emerald} strokeWidth={2} fill="none" />
+      {/* Points */}
+      {points.map((p, i) => (
+        <Circle key={i} cx={p.x} cy={p.y} r={3} fill={COLORS.emerald} />
+      ))}
+    </Svg>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Main PDF component
+// ──────────────────────────────────────────────────────────────────────
 
 export type ScientificPdfProps = {
   report: ScientificReport;
@@ -198,60 +472,60 @@ export function ScientificReportPdf({
 }: ScientificPdfProps) {
   return (
     <Document>
+      {/* ═══════════════════════════════════════════════════════════
+         PAGE 1 — COVER + SECTIONS 1 (Academic) + 2 (Observations)
+         ═══════════════════════════════════════════════════════════ */}
       <Page size="A4" style={styles.page}>
-        {/* ── Header ── */}
-        <View style={styles.header}>
-          <View style={styles.brandLogo}>
-            <Text>DZ-ECOLE</Text>
+        {/* COVER HEADER */}
+        <View style={styles.coverHeader}>
+          <View style={styles.brandBox}>
+            <Text style={styles.brandText}>EDURA</Text>
+            <Text style={styles.brandSub}>v1.0</Text>
           </View>
-          <View style={{ flex: 1, marginLeft: 8 }}>
-            <Text style={[styles.title, { color: COLORS.emerald }]}>
-              MINISTERE DE L&apos;EDUCATION NATIONALE
+          <View style={styles.reportTitleBox}>
+            <Text style={styles.reportTitleAr}>التقرير العلمي الشامل للطالب</Text>
+            <Text style={styles.reportTitle}>RAPPORT SCIENTIFIQUE ET D&apos;ORIENTATION</Text>
+            <Text style={styles.reportSubtitle}>Bilan Pedagogique et d&apos;Orientation Complet</Text>
+            <Text style={styles.reportMotto}>
+              « Revelons les talents, construisons l&apos;avenir »
             </Text>
-            <Text style={styles.subtitle}>
-              {school.name} - {school.wilaya} - {year}
-            </Text>
-            <Text style={[styles.title, { marginTop: 6 }]}>
-              RAPPORT SCIENTIFIQUE ET D&apos;ORIENTATION
-            </Text>
-            <Text style={[styles.subtitle, { fontSize: 7 }]}>
-              Bilan Pedagogique et d&apos;Orientation Complet
+            <Text style={[styles.textSmall, { color: COLORS.muted, marginTop: 4 }]}>
+              {school.name} - {school.wilaya}
             </Text>
           </View>
-          <View style={{ width: 140, fontSize: 8 }}>
-            <Text>
-              <Text style={styles.muted}>Nom: </Text>
-              <Text style={styles.bold}>{report.meta.studentName}</Text>
-            </Text>
-            <Text>
-              <Text style={styles.muted}>Classe: </Text>
-              {report.meta.className}
-            </Text>
-            <Text>
-              <Text style={styles.muted}>Annee: </Text>
-              {year}
-            </Text>
+          <View style={styles.studentInfoBox}>
+            <View style={styles.studentInfoRow}>
+              <Text style={styles.studentInfoLabel}>Nom complet</Text>
+              <Text style={styles.studentInfoValue}>{report.meta.studentName}</Text>
+            </View>
+            <View style={styles.studentInfoRow}>
+              <Text style={styles.studentInfoLabel}>Classe</Text>
+              <Text style={styles.studentInfoValue}>{report.meta.className}</Text>
+            </View>
+            <View style={styles.studentInfoRow}>
+              <Text style={styles.studentInfoLabel}>Annee scolaire</Text>
+              <Text style={styles.studentInfoValue}>{year}</Text>
+            </View>
             {report.meta.iq.score && (
-              <Text>
-                <Text style={styles.muted}>QI: </Text>
-                <Text style={[styles.bold, { color: COLORS.emerald }]}>
-                  {report.meta.iq.score}
-                </Text>{" "}
-                ({report.meta.iq.interpretation})
-              </Text>
+              <View style={styles.studentInfoRow}>
+                <Text style={styles.studentInfoLabel}>QI mesure</Text>
+                <Text style={[styles.studentInfoValue, { color: COLORS.indigo }]}>
+                  {report.meta.iq.score} ({report.meta.iq.interpretation})
+                </Text>
+              </View>
             )}
           </View>
         </View>
 
-        {/* ── Section 1: Synthèse Académique ── */}
+        {/* SECTION 1 — Academic */}
         <SectionBanner
           n={1}
           title="SYNTHESE ACADEMIQUE"
-          titleAr="Nazra 3ammah ekadimiya"
+          titleAr="نظرة عامة أكاديمية"
           color={COLORS.emerald}
         />
         <View style={styles.row}>
-          <View style={[styles.col, { marginRight: 8 }]}>
+          <View style={styles.twoCol}>
             <Text style={styles.subheading}>Meilleures matieres</Text>
             {report.academic.bestSubjects.map((s, i) => (
               <View
@@ -267,15 +541,12 @@ export function ScientificReportPdf({
             {report.academic.weakSubjects.length > 0 && (
               <>
                 <Text style={[styles.subheading, { marginTop: 8, color: COLORS.red }]}>
-                  A renforcer
+                  Matieres a renforcer
                 </Text>
                 {report.academic.weakSubjects.map((s, i) => (
                   <View
                     key={i}
-                    style={[
-                      styles.row,
-                      { justifyContent: "space-between", marginBottom: 2 },
-                    ]}
+                    style={[styles.row, { justifyContent: "space-between", marginBottom: 2 }]}
                   >
                     <Text style={styles.text}>{s.name}</Text>
                     <Text style={[styles.text, styles.bold, { color: COLORS.red }]}>
@@ -287,39 +558,54 @@ export function ScientificReportPdf({
             )}
           </View>
           <View style={styles.col}>
-            <Text style={styles.subheading}>Progression Moyenne (GPA)</Text>
-            {report.academic.gpaTrend.map((t) => (
-              <View
-                key={t.trimester}
-                style={[styles.row, { justifyContent: "space-between", marginBottom: 2 }]}
-              >
-                <Text style={styles.text}>Trimestre {t.trimester}</Text>
-                <Text style={[styles.text, styles.bold]}>{t.gpa}/20</Text>
-              </View>
-            ))}
+            <Text style={styles.subheading}>Progression du GPA</Text>
+            <GpaSparkline data={report.academic.gpaTrend} width={200} height={50} />
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 2 }}>
+              {report.academic.gpaTrend.map((t, i) => (
+                <Text key={i} style={[styles.textSmall, { color: COLORS.muted }]}>
+                  T{t.trimester}: {t.gpa}
+                </Text>
+              ))}
+            </View>
             <View
               style={{
-                marginTop: 6,
-                padding: 5,
+                marginTop: 8,
+                padding: 6,
                 backgroundColor: "#F0FDF4",
                 borderRadius: 4,
+                borderLeftWidth: 3,
+                borderLeftColor: COLORS.emerald,
               }}
             >
-              <Text style={styles.muted}>Moyenne generale</Text>
-              <Text
-                style={{ fontSize: 14, fontWeight: 700, color: COLORS.emerald }}
-              >
+              <Text style={[styles.textSmall, styles.muted]}>Moyenne generale</Text>
+              <Text style={{ fontSize: 18, fontWeight: 700, color: COLORS.emerald }}>
                 {report.academic.overallGpa}/20
+              </Text>
+              <Text style={[styles.textSmall, { color: COLORS.muted, fontStyle: "italic" }]}>
+                Tendance:{" "}
+                {report.academic.progressionLabel === "EN_PROGRESSION"
+                  ? "En progression positive"
+                  : report.academic.progressionLabel === "EN_BAISSE"
+                    ? "En baisse - vigilance"
+                    : "Stable"}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* ── Section 2: Commentaires Enseignants ── */}
+        <InterpretBox
+          title="Comment lire cette section ?"
+          text="Le GPA est la moyenne generale sur 20. Un GPA > 14/20 indique de bons resultats ; entre 10 et 14, des resultats moyens ; sous 10, un soutien est recommande. La courbe de progression montre l'evolution trimestre par trimestre - une courbe ascendante = amelioration. Les matieres fortes revelent les domaines d'excellence ; les faibles, ou concentrer le soutien."
+          borderColor={COLORS.emerald}
+          bg="#F0FDF4"
+          titleColor={COLORS.emeraldDark}
+        />
+
+        {/* SECTION 2 — Observations */}
         <SectionBanner
           n={2}
           title="COMMENTAIRES DES ENSEIGNANTS"
-          titleAr="Mola7adat al-Asatidha"
+          titleAr="ملاحظات الأساتذة"
           color={COLORS.red}
         />
         {report.observations.length === 0 ? (
@@ -328,7 +614,7 @@ export function ScientificReportPdf({
           </Text>
         ) : (
           <View>
-            {report.observations.slice(0, 6).map((o, i) => (
+            {report.observations.slice(0, 4).map((o, i) => (
               <View key={i} style={styles.obsCard}>
                 <Text style={styles.obsTitle}>{o.subjectName}</Text>
                 <Text style={styles.obsBody}>{o.observation}</Text>
@@ -343,18 +629,40 @@ export function ScientificReportPdf({
           </View>
         )}
 
-        {/* ── Section 3: Profil Psychopédagogique ── */}
+        <InterpretBox
+          title="Pourquoi les observations sont-elles importantes ?"
+          text="Les observations qualitatives des enseignants capturent ce que les notes ne disent pas : comportement, motivation, leadership, creativite, esprit d'equipe. Chaque enseignant peut tagger les intelligences observees (Linguistique, Logique, Interpersonnelle, etc.) - ces tags enrichissent automatiquement le profil psychopedagogique calcule en page suivante. Pour les parents : ces commentaires aident a comprendre l'enfant au-dela des notes."
+          borderColor={COLORS.red}
+          bg="#FEF2F2"
+          titleColor={COLORS.redDark}
+        />
+
+        <Text style={styles.footer}>
+          Page 1/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+        </Text>
+      </Page>
+
+      {/* ═══════════════════════════════════════════════════════════
+         PAGE 2 — PROFIL PSYCHOPEDAGOGIQUE
+         ═══════════════════════════════════════════════════════════ */}
+      <Page size="A4" style={styles.page}>
         <SectionBanner
           n={3}
           title="PROFIL PSYCHOPEDAGOGIQUE ET CONSEILS"
-          titleAr="Al-malaff al-nafsi al-tarbawi"
+          titleAr="الملف النفسي التربوي"
           color={COLORS.amber}
         />
+
         <View style={styles.row}>
-          <View style={[styles.col, { marginRight: 8 }]}>
-            <Text style={styles.subheading}>Type d&apos;intelligence (Gardner)</Text>
+          <View style={styles.twoCol}>
+            <Text style={styles.subheading}>
+              Intelligences Multiples (Howard Gardner)
+            </Text>
+            <Text style={[styles.textSmall, styles.muted, { marginBottom: 6 }]}>
+              Les 5 intelligences dominantes detectees chez l&apos;eleve
+            </Text>
             {report.profile.intelligences.map((i, idx) => (
-              <View key={idx} style={{ marginBottom: 3 }}>
+              <View key={idx} style={{ marginBottom: 5 }}>
                 <View
                   style={[
                     styles.row,
@@ -364,30 +672,34 @@ export function ScientificReportPdf({
                   <Text style={styles.text}>{i.label}</Text>
                   <Text style={[styles.text, styles.bold]}>{i.score}%</Text>
                 </View>
-                <View
-                  style={{
-                    height: 4,
-                    backgroundColor: "#FEF3C7",
-                    borderRadius: 2,
-                  }}
-                >
+                <View style={styles.intelligenceBar}>
                   <View
-                    style={{
-                      height: 4,
-                      width: `${i.score}%`,
-                      backgroundColor: COLORS.amber,
-                      borderRadius: 2,
-                    }}
+                    style={[
+                      styles.intelligenceFill,
+                      {
+                        width: `${i.score}%`,
+                        backgroundColor: [
+                          COLORS.amber,
+                          COLORS.indigo,
+                          COLORS.emerald,
+                          COLORS.purple,
+                          COLORS.red,
+                        ][idx % 5],
+                      },
+                    ]}
                   />
                 </View>
               </View>
             ))}
+
             <View
               style={{
-                marginTop: 6,
-                padding: 5,
+                marginTop: 10,
+                padding: 7,
                 backgroundColor: "#FEF3C7",
                 borderRadius: 4,
+                borderLeftWidth: 3,
+                borderLeftColor: COLORS.amber,
               }}
             >
               <Text
@@ -395,97 +707,395 @@ export function ScientificReportPdf({
                   fontSize: 7,
                   textTransform: "uppercase",
                   fontWeight: 700,
-                  color: "#92400E",
+                  color: COLORS.amberDark,
+                  letterSpacing: 0.3,
                 }}
               >
-                Style d&apos;apprentissage
+                Style d&apos;apprentissage detecte
               </Text>
-              <Text style={[styles.text, styles.bold, { fontSize: 9 }]}>
+              <Text style={[styles.text, styles.bold, { fontSize: 10, marginTop: 2 }]}>
                 {report.profile.learningStyle}
+              </Text>
+              <Text style={[styles.textSmall, { marginTop: 3 }]}>
+                {report.profile.learningStyleDescription}
               </Text>
             </View>
           </View>
+
           <View style={styles.col}>
             <Text style={styles.subheading}>Conseils personnalises</Text>
             {report.profile.personalizedAdvices.length === 0 ? (
               <Text style={[styles.text, styles.muted, { fontStyle: "italic" }]}>
-                Donnees insuffisantes
+                Donnees insuffisantes pour generer des conseils.
               </Text>
             ) : (
               report.profile.personalizedAdvices.map((a, i) => (
-                <View key={i} style={[styles.row, { marginBottom: 3 }]}>
-                  <Text style={[styles.text, { color: COLORS.amber, marginRight: 4 }]}>
-                    *
+                <View
+                  key={i}
+                  style={{
+                    flexDirection: "row",
+                    marginBottom: 4,
+                    padding: 6,
+                    backgroundColor: COLORS.white,
+                    borderLeftWidth: 2,
+                    borderLeftColor: COLORS.amber,
+                    borderRadius: 2,
+                  }}
+                >
+                  <Text
+                    style={[styles.text, { color: COLORS.amberDark, marginRight: 4, fontWeight: 700 }]}
+                  >
+                    {i + 1}.
                   </Text>
                   <Text style={[styles.text, { flex: 1 }]}>{a}</Text>
                 </View>
               ))
             )}
-          </View>
-        </View>
 
-        {/* ── Section 4: Prédiction et Avenir ── */}
-        <SectionBanner
-          n={4}
-          title="PREDICTION ET AVENIR"
-          titleAr="Al-tanaboo' wa al-moustakbal"
-          color={COLORS.purple}
-        />
-        <View style={styles.row}>
-          <View style={[styles.col, { marginRight: 8 }]}>
-            <Text style={styles.subheading}>Filieres recommandees</Text>
-            {report.prediction.recommendedFilieres.map((f, i) => (
-              <View key={i} style={styles.filiereCard}>
-                <Text style={[styles.text, styles.bold]}>{f.name}</Text>
-                <Text
-                  style={{
-                    backgroundColor: COLORS.purple,
-                    color: "#fff",
-                    paddingHorizontal: 4,
-                    paddingVertical: 1,
-                    borderRadius: 8,
-                    fontSize: 7,
-                    fontWeight: 700,
-                  }}
-                >
-                  {f.confidence}%
+            {report.profile.interests.length > 0 && (
+              <View style={{ marginTop: 8 }}>
+                <Text style={[styles.subheading, { fontSize: 8 }]}>
+                  Centres d&apos;interet declares
                 </Text>
+                <View style={styles.row}>
+                  {report.profile.interests.map((interest, i) => (
+                    <Text
+                      key={i}
+                      style={{
+                        backgroundColor: "#EEF2FF",
+                        color: COLORS.indigoDark,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        borderRadius: 8,
+                        fontSize: 7,
+                        marginRight: 3,
+                        marginBottom: 3,
+                      }}
+                    >
+                      {interest}
+                    </Text>
+                  ))}
+                </View>
               </View>
-            ))}
-          </View>
-          <View style={styles.col}>
-            <Text style={styles.subheading}>Perspectives de carriere</Text>
-            {report.prediction.careerSuggestions.map((c, i) => (
-              <View key={i} style={styles.careerCard}>
-                <Text style={[styles.text, styles.bold]}>{c.title}</Text>
-                <Text style={[styles.text, styles.muted, { fontSize: 7 }]}>
-                  {c.requiredStudies}
-                </Text>
-              </View>
-            ))}
-            {report.prediction.universitySuggestions.length > 0 && (
-              <View style={{ marginTop: 6 }}>
-                <Text
-                  style={{
-                    fontSize: 7,
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    color: COLORS.purple,
-                  }}
-                >
-                  Universites pertinentes
-                </Text>
-                <Text style={[styles.text, { marginTop: 2 }]}>
-                  {report.prediction.universitySuggestions.join(" - ")}
-                </Text>
+            )}
+
+            {report.profile.hobbies.length > 0 && (
+              <View style={{ marginTop: 4 }}>
+                <Text style={[styles.subheading, { fontSize: 8 }]}>Loisirs</Text>
+                <View style={styles.row}>
+                  {report.profile.hobbies.map((h, i) => (
+                    <Text
+                      key={i}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: COLORS.border,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        borderRadius: 8,
+                        fontSize: 7,
+                        marginRight: 3,
+                        marginBottom: 3,
+                      }}
+                    >
+                      {h}
+                    </Text>
+                  ))}
+                </View>
               </View>
             )}
           </View>
         </View>
 
+        <InterpretBox
+          title="Que signifie ce profil psychopedagogique ?"
+          text="Les intelligences multiples (Howard Gardner, Harvard, 1983) postulent que l'intelligence n'est pas unique mais multi-dimensionnelle - il existe 8 types d'intelligence et chacun de nous combine ces dimensions a des degres variables. Le graphique des barres montre les 5 intelligences dominantes. Plus la barre est longue, plus cette intelligence est developpee. Exemple : Logique-Mathematique dominante = profil scientifique ; Linguistique dominante = profil litteraire ou langues. Le style d'apprentissage (modele VAK/RW de Fleming 1995) indique comment l'eleve absorbe le mieux l'information. C'est crucial pour adapter la pedagogie."
+          borderColor={COLORS.amber}
+          bg="#FEF3C7"
+          titleColor={COLORS.amberDark}
+        />
+
         <Text style={styles.footer}>
-          Document genere automatiquement par EDURA -{" "}
-          {new Date(report.meta.generatedAt).toLocaleString("fr-FR")}
+          Page 2/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+        </Text>
+      </Page>
+
+      {/* ═══════════════════════════════════════════════════════════
+         PAGE 3 — ORIENTATION + CAREERS + UNIVERSITIES
+         ═══════════════════════════════════════════════════════════ */}
+      <Page size="A4" style={styles.page}>
+        <SectionBanner
+          n={4}
+          title="PREDICTION D'ORIENTATION ET PERSPECTIVES"
+          titleAr="التنبؤ والمستقبل"
+          color={COLORS.purple}
+        />
+
+        <Text style={styles.subheading}>
+          Filieres BAC recommandees par ordre de pertinence
+        </Text>
+        <Text style={[styles.textSmall, styles.muted, { marginBottom: 6 }]}>
+          Calcul base sur la ponderation des matieres cles de chaque filiere algerienne
+        </Text>
+
+        {report.prediction.recommendedFilieres.map((f, i) => (
+          <View key={i} style={styles.filiereCard}>
+            <View style={styles.filiereHeader}>
+              <Text style={[styles.text, styles.bold, { fontSize: 10 }]}>
+                {i + 1}. {f.name}
+              </Text>
+              <Text style={styles.confidenceBadge}>{f.confidence}% d&apos;adequation</Text>
+            </View>
+            <Text style={styles.text}>{f.reasoning}</Text>
+          </View>
+        ))}
+
+        <View style={[styles.row, { marginTop: 10 }]}>
+          <View style={styles.twoCol}>
+            <Text style={styles.subheading}>Metiers correspondants</Text>
+            <Text style={[styles.textSmall, styles.muted, { marginBottom: 5 }]}>
+              Carrieres adaptees au profil de l&apos;eleve
+            </Text>
+            {report.prediction.careerSuggestions.map((c, i) => (
+              <View key={i} style={styles.careerCard}>
+                <Text style={[styles.text, styles.bold]}>{c.title}</Text>
+                <Text style={[styles.textSmall, { color: COLORS.purpleDark }]}>
+                  {c.filiere}
+                </Text>
+                <Text style={[styles.textSmall, styles.muted, { marginTop: 1 }]}>
+                  {c.requiredStudies}
+                </Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.col}>
+            <Text style={styles.subheading}>Universites & Ecoles Superieures algeriennes</Text>
+            <Text style={[styles.textSmall, styles.muted, { marginBottom: 5 }]}>
+              Etablissements publics reputes dans le domaine
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {report.prediction.universitySuggestions.map((u, i) => (
+                <Text key={i} style={styles.universityPill}>
+                  {u}
+                </Text>
+              ))}
+            </View>
+
+            <View
+              style={{
+                marginTop: 8,
+                padding: 7,
+                backgroundColor: "#FAF5FF",
+                borderRadius: 4,
+                borderLeftWidth: 3,
+                borderLeftColor: COLORS.purple,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 7,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  color: COLORS.purpleDark,
+                  letterSpacing: 0.3,
+                  marginBottom: 3,
+                }}
+              >
+                Conseil d&apos;orientation
+              </Text>
+              <Text style={styles.textSmall}>
+                Cette analyse est un outil d&apos;aide a la decision, pas une sentence definitive.
+                La motivation et les reves de l&apos;eleve restent primordiaux. Discuter
+                avec l&apos;enfant et les enseignants reste essentiel pour une orientation reussie.
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <InterpretBox
+          title="Comment interpreter ce pourcentage d'adequation ?"
+          text="Plus le pourcentage est eleve, plus l'adequation entre les performances actuelles de l'eleve et les exigences de la filiere est forte. Un score > 75% indique une voie naturelle ; entre 60% et 75%, une voie possible avec adaptation ; sous 60%, mieux vaut explorer d'autres pistes. Le calcul utilise des ponderations validees par la recherche en sciences de l'education. Exemple : Sciences Experimentales privilegie SVT (35%), Physique (30%), Math (25%), FR/EN (10%)."
+          borderColor={COLORS.purple}
+          bg="#FAF5FF"
+          titleColor={COLORS.purpleDark}
+        />
+
+        <Text style={styles.footer}>
+          Page 3/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+        </Text>
+      </Page>
+
+      {/* ═══════════════════════════════════════════════════════════
+         PAGE 4 — EDURA INSTITUTION TRIDIMENSIONNELLE (VISION)
+         ═══════════════════════════════════════════════════════════ */}
+      <Page size="A4" style={styles.page}>
+        <View style={styles.visionHeader}>
+          <Text style={[styles.textSmall, { color: COLORS.amber, fontWeight: 700 }]}>
+            PERSPECTIVES D&apos;EVOLUTION & VISION FUTURISTE
+          </Text>
+          <Text style={styles.visionTitle}>L&apos;ECOSYSTEME EDURA</Text>
+          <Text style={styles.visionSubtitle}>
+            Au-dela du rapport scolaire — Vers une institution d&apos;elite ouverte a tous
+          </Text>
+          <Text style={styles.visionMotto}>
+            « Revelons les talents, construisons l&apos;avenir »
+          </Text>
+        </View>
+
+        {/* 1. Tridimensionnelle */}
+        <View style={styles.visionSection}>
+          <Text style={styles.visionSectionTitle}>
+            1. L&apos;EDUCATION TRIDIMENSIONNELLE : au-dela du cadre academique
+          </Text>
+          <Text style={[styles.textSmall, { marginBottom: 6 }]}>
+            Le systeme educatif conventionnel s&apos;est longtemps limite a une evaluation
+            unidimensionnelle basee sur la memorisation. Le bilan scientifique d&apos;EDURA
+            marque une rupture paradigmatique en Algerie en introduisant une approche
+            holistique qui fusionne <Text style={styles.bold}>trois dimensions critiques</Text> :
+          </Text>
+          <View style={styles.row}>
+            <View style={[styles.dimensionCard, { backgroundColor: "#EEF2FF", borderLeftColor: COLORS.indigo }]}>
+              <Text style={[styles.dimensionLabel, { color: COLORS.indigoDark }]}>
+                ACADEMIQUE
+              </Text>
+              <Text style={styles.dimensionDesc}>
+                Les resultats factuels (notes, moyennes, progression dans les matieres scolaires)
+              </Text>
+            </View>
+            <View style={[styles.dimensionCard, { backgroundColor: "#FAF5FF", borderLeftColor: COLORS.purple }]}>
+              <Text style={[styles.dimensionLabel, { color: COLORS.purpleDark }]}>
+                PSYCHOLOGIQUE
+              </Text>
+              <Text style={styles.dimensionDesc}>
+                Le profil de personnalite et les neurosciences cognitives (Gardner, VAK/RW)
+              </Text>
+            </View>
+            <View style={[styles.dimensionCard, { backgroundColor: "#FEF3C7", borderLeftColor: COLORS.amber }]}>
+              <Text style={[styles.dimensionLabel, { color: COLORS.amberDark }]}>
+                POTENTIEL
+              </Text>
+              <Text style={styles.dimensionDesc}>
+                Les aptitudes innees et les projections de carriere personnalisees
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 2. Institution */}
+        <View style={styles.visionSection}>
+          <Text style={styles.visionSectionTitle}>
+            2. L&apos;INSTITUTION EDURA : un incubateur de talents pour tous
+          </Text>
+          <Text style={[styles.textSmall, { marginBottom: 6 }]}>
+            Les donnees recoltees ne doivent pas rester theoriques. L&apos;Institution
+            EDURA intervient comme <Text style={styles.bold}>prolongement operationnel</Text> :
+            un programme d&apos;enrichissement ouvert a tous, partant du principe scientifique
+            que <Text style={{ fontStyle: "italic" }}>chaque eleve possede une « zone de genie » specifique</Text>.
+          </Text>
+          <View style={styles.row}>
+            <View style={styles.poleBox}>
+              <Text style={[styles.poleTitle, { color: COLORS.indigo }]}>
+                Pole Technologique & Scientifique
+              </Text>
+              <Text style={styles.poleBullet}>* Immersion pratique en ingenierie</Text>
+              <Text style={styles.poleBullet}>* Codage applicatif, Robotique (Arduino)</Text>
+              <Text style={styles.poleBullet}>* Initiation medicale</Text>
+              <Text style={styles.poleBullet}>* Sciences environnementales</Text>
+            </View>
+            <View style={styles.poleBox}>
+              <Text style={[styles.poleTitle, { color: COLORS.emerald }]}>
+                Pole Economique & Management
+              </Text>
+              <Text style={styles.poleBullet}>* Incubation entrepreneuriale precoce</Text>
+              <Text style={styles.poleBullet}>* Litteratie financiere</Text>
+              <Text style={styles.poleBullet}>* Gestion de projet</Text>
+              <Text style={styles.poleBullet}>* Sciences de l&apos;education</Text>
+            </View>
+            <View style={[styles.poleBox, { marginRight: 0 }]}>
+              <Text style={[styles.poleTitle, { color: COLORS.red }]}>
+                Pole Humain & Creatif
+              </Text>
+              <Text style={styles.poleBullet}>* Intelligences interpersonnelles et spatiales</Text>
+              <Text style={styles.poleBullet}>* Arts plastiques & Musicologie</Text>
+              <Text style={styles.poleBullet}>* Analyse geographique</Text>
+              <Text style={styles.poleBullet}>* Sport de performance</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 3. Alignement neuropedagogique */}
+        <View style={styles.visionSection}>
+          <Text style={styles.visionSectionTitle}>
+            3. ALIGNEMENT NEUROPEDAGOGIQUE : la methodologie d&apos;apprentissage
+          </Text>
+          <Text style={[styles.textSmall, { marginBottom: 4 }]}>
+            La veritable innovation reside dans l&apos;isomorphisme methodologique. Les cours
+            ne sont pas dispensés de maniere uniforme : les experts concoivent des formats
+            pedagogiques calques sur les types d&apos;intelligence valides par nos psycho-analystes.
+          </Text>
+          <View
+            style={{
+              padding: 7,
+              backgroundColor: "#F1F5F9",
+              borderRadius: 4,
+              marginTop: 4,
+            }}
+          >
+            <Text style={[styles.textSmall, styles.bold, { color: COLORS.text }]}>
+              Exemple methodologique :
+            </Text>
+            <Text style={[styles.textSmall, { marginTop: 2, fontStyle: "italic" }]}>
+              Si un eleve revele une dominance visuo-spatiale et un interet entrepreneurial,
+              les concepts de gestion lui seront enseignes via la modelisation graphique et
+              les matrices d&apos;architecture. A l&apos;inverse, un profil linguistique abordera
+              la finance par la rhetorique de negociation et la redaction strategique.
+            </Text>
+          </View>
+        </View>
+
+        {/* 4. Vision avenir */}
+        <View
+          style={{
+            padding: 10,
+            backgroundColor: COLORS.indigoDark,
+            borderRadius: 6,
+            marginTop: 6,
+          }}
+        >
+          <Text style={[styles.visionSectionTitle, { color: COLORS.white }]}>
+            4. UNE VISION D&apos;AVENIR POUR LA JEUNESSE ALGERIENNE
+          </Text>
+          <Text style={[styles.textSmall, { color: COLORS.white }]}>
+            En connectant les ecoles privees partenaires a cette institution d&apos;elite,
+            EDURA dessine les contours de <Text style={styles.bold}>l&apos;ecole de demain en Algerie</Text>.
+            Nous ne formons pas des executants conformes a un programme rigide ; nous revelons
+            des esprits agiles, psychologiquement equilibres, conscients de leurs forces et armes
+            techniquement pour devenir les leaders, ingenieurs, artistes et entrepreneurs de
+            l&apos;economie de la connaissance.
+          </Text>
+          <View
+            style={{
+              marginTop: 8,
+              paddingTop: 6,
+              borderTopWidth: 1,
+              borderTopColor: "rgba(255,255,255,0.3)",
+            }}
+          >
+            <Text
+              style={{
+                color: COLORS.amber,
+                fontSize: 9,
+                fontStyle: "italic",
+                textAlign: "center",
+                fontWeight: 700,
+              }}
+            >
+              « Chaque enfant porte en lui un genie. Notre mission est de l&apos;activer. »
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.footer}>
+          Page 4/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
         </Text>
       </Page>
     </Document>
