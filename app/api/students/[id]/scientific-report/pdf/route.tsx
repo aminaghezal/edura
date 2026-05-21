@@ -3,6 +3,7 @@ import { renderToStream } from "@react-pdf/renderer";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth";
 import { generateScientificReport } from "@/lib/orientation/profile";
+import { generateMBTIProfile } from "@/lib/orientation/mbti";
 import { ScientificReportPdf } from "@/lib/pdf/scientific-report";
 
 export async function GET(
@@ -86,9 +87,12 @@ export async function GET(
     availableFilieres,
   });
 
+  const mbtiProfile = generateMBTIProfile(student.mbtiType);
+
   const stream = await renderToStream(
     <ScientificReportPdf
       report={report}
+      mbti={mbtiProfile}
       school={school ?? { name: "École", wilaya: "", director: "" }}
       year={year?.name ?? "2025-2026"}
     />,

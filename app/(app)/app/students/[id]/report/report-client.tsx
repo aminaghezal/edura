@@ -36,6 +36,9 @@ import { TrendChart } from "@/components/dashboard/area-chart";
 import { DonutChart } from "@/components/dashboard/donut-chart";
 import { VerticalBarChart } from "@/components/dashboard/bar-chart";
 import type { ScientificReport } from "@/lib/orientation/profile";
+import { ALL_MBTI_TYPES } from "@/lib/orientation/mbti";
+import { MBTISection } from "./mbti-section";
+import { StudentPhotoUpload } from "./photo-upload";
 import {
   updateStudentProfile,
   addObservation,
@@ -78,6 +81,9 @@ export function ReportClient({
     iqScore: number | null;
     iqTestName: string | null;
     iqTestDate: string | null;
+    mbtiType: string | null;
+    mbtiTestDate: string | null;
+    photoUrl: string | null;
     learningStyle: string | null;
     hobbies: string | null;
     interests: string | null;
@@ -167,7 +173,16 @@ export function ReportClient({
             {report.meta.studentName} — {report.meta.className}
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* Photo upload */}
+          <div className="hidden md:block">
+            <StudentPhotoUpload
+              studentId={student.id}
+              initialPhotoUrl={student.photoUrl}
+              firstName={student.firstName}
+            />
+          </div>
+
           <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
@@ -203,7 +218,7 @@ export function ReportClient({
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="iqTestDate">Date du test</Label>
+                  <Label htmlFor="iqTestDate">Date du test IQ</Label>
                   <Input
                     id="iqTestDate"
                     name="iqTestDate"
@@ -211,6 +226,36 @@ export function ReportClient({
                     defaultValue={student.iqTestDate?.slice(0, 10) ?? ""}
                   />
                 </div>
+
+                {/* MBTI inputs */}
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                  <div>
+                    <Label htmlFor="mbtiType">Type MBTI (16 personnalités)</Label>
+                    <select
+                      id="mbtiType"
+                      name="mbtiType"
+                      defaultValue={student.mbtiType ?? ""}
+                      className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                    >
+                      <option value="">— Non évalué —</option>
+                      {ALL_MBTI_TYPES.map((t) => (
+                        <option key={t.type} value={t.type}>
+                          {t.type} — {t.nickname}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="mbtiTestDate">Date du test MBTI</Label>
+                    <Input
+                      id="mbtiTestDate"
+                      name="mbtiTestDate"
+                      type="date"
+                      defaultValue={student.mbtiTestDate?.slice(0, 10) ?? ""}
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <Label htmlFor="learningStyle">Style d&apos;apprentissage</Label>
                   <select
@@ -401,30 +446,54 @@ export function ReportClient({
                 </div>
               </div>
 
-              <div className="text-right text-xs leading-relaxed">
-                <div>
-                  <span className="text-slate-500">Nom :</span>{" "}
-                  <span className="font-bold">{report.meta.studentName}</span>
+              <div className="flex items-start gap-3">
+                {/* Student photo */}
+                <div className="w-20 h-20 rounded-lg border-2 border-indigo-300 overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 flex-shrink-0">
+                  {student.photoUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={student.photoUrl}
+                      alt={student.firstName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full grid place-items-center text-3xl font-bold text-indigo-600">
+                      {student.firstName[0]?.toUpperCase()}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <span className="text-slate-500">Classe :</span>{" "}
-                  <span className="font-semibold">{report.meta.className}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500">Année :</span>{" "}
-                  <span className="font-semibold">2025-2026</span>
-                </div>
-                {report.meta.iq.score && (
+
+                <div className="text-right text-xs leading-relaxed">
                   <div>
-                    <span className="text-slate-500">QI :</span>{" "}
-                    <span className="font-bold text-emerald-700">
-                      {report.meta.iq.score}
-                    </span>{" "}
-                    <span className="text-slate-500">
-                      ({report.meta.iq.interpretation})
-                    </span>
+                    <span className="text-slate-500">Nom :</span>{" "}
+                    <span className="font-bold">{report.meta.studentName}</span>
                   </div>
-                )}
+                  <div>
+                    <span className="text-slate-500">Classe :</span>{" "}
+                    <span className="font-semibold">{report.meta.className}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">Année :</span>{" "}
+                    <span className="font-semibold">2025-2026</span>
+                  </div>
+                  {report.meta.iq.score && (
+                    <div>
+                      <span className="text-slate-500">QI :</span>{" "}
+                      <span className="font-bold text-indigo-700">
+                        {report.meta.iq.score}
+                      </span>{" "}
+                      <span className="text-slate-500">
+                        ({report.meta.iq.interpretation})
+                      </span>
+                    </div>
+                  )}
+                  {student.mbtiType && (
+                    <div>
+                      <span className="text-slate-500">MBTI :</span>{" "}
+                      <span className="font-bold text-cyan-700">{student.mbtiType}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -728,6 +797,9 @@ export function ReportClient({
             <strong>Les conseils personnalisés</strong> sont générés algorithmiquement à partir de l&apos;intelligence dominante détectée + des matières faibles + de la tendance des notes. Ils sont à discuter avec l&apos;enfant.
           </p>
         </InterpretationBox>
+
+        {/* ─── Section 3-bis : MBTI PERSONALITY (cyan) ─── */}
+        <MBTISection mbtiType={student.mbtiType} mbtiTestDate={student.mbtiTestDate} />
 
         {/* ─── Section 4: PRÉDICTION ET AVENIR (purple) ─── */}
         <ReportSection

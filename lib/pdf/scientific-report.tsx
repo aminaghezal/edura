@@ -20,6 +20,7 @@ import {
   G,
 } from "@react-pdf/renderer";
 import type { ScientificReport } from "@/lib/orientation/profile";
+import type { MBTIProfile } from "@/lib/orientation/mbti";
 
 const COLORS = {
   emerald: "#16A34A",
@@ -461,12 +462,14 @@ function GpaSparkline({ data, width = 200, height = 60 }: {
 
 export type ScientificPdfProps = {
   report: ScientificReport;
+  mbti: MBTIProfile | null;
   school: { name: string; wilaya: string; director: string };
   year: string;
 };
 
 export function ScientificReportPdf({
   report,
+  mbti,
   school,
   year,
 }: ScientificPdfProps) {
@@ -638,7 +641,7 @@ export function ScientificReportPdf({
         />
 
         <Text style={styles.footer}>
-          Page 1/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+          Page 1/5 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
         </Text>
       </Page>
 
@@ -815,12 +818,162 @@ export function ScientificReportPdf({
         />
 
         <Text style={styles.footer}>
-          Page 2/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+          Page 2/5 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
         </Text>
       </Page>
 
       {/* ═══════════════════════════════════════════════════════════
-         PAGE 3 — ORIENTATION + CAREERS + UNIVERSITIES
+         PAGE 3 — MBTI PERSONALITY PROFILE
+         ═══════════════════════════════════════════════════════════ */}
+      <Page size="A4" style={styles.page}>
+        <SectionBanner
+          n={4}
+          title="PROFIL DE PERSONNALITE (MBTI)"
+          titleAr="نوع الشخصية"
+          color="#06B6D4"
+        />
+
+        {!mbti ? (
+          <View style={{ padding: 20, alignItems: "center" }}>
+            <Text style={[styles.text, styles.muted, { fontStyle: "italic", textAlign: "center" }]}>
+              Type MBTI non encore evalue pour cet eleve.
+            </Text>
+            <Text style={[styles.textSmall, styles.muted, { marginTop: 8, textAlign: "center" }]}>
+              Le directeur ou conseiller peut saisir le resultat du test MBTI via la
+              section &quot;Saisie IQ &amp; Profil&quot; de la plateforme EDURA.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.row}>
+              {/* Identity Card */}
+              <View style={[styles.twoCol, { padding: 12, backgroundColor: "#ECFEFF", borderRadius: 6, borderWidth: 1, borderColor: "#67E8F9", alignItems: "center" }]}>
+                <Text style={{ fontSize: 36, fontWeight: 700, color: "#0E7490", letterSpacing: 2 }}>
+                  {mbti.type}
+                </Text>
+                <Text style={[styles.text, styles.bold, { fontSize: 12, marginTop: 4, color: COLORS.text }]}>
+                  {mbti.nickname}
+                </Text>
+                <View
+                  style={{
+                    marginTop: 6,
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    backgroundColor: "#A5F3FC",
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text style={{ fontSize: 8, fontWeight: 700, color: "#0E7490", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    {mbti.category}
+                  </Text>
+                </View>
+                <Text style={[styles.textSmall, { marginTop: 8, fontStyle: "italic", textAlign: "center" }]}>
+                  {mbti.description}
+                </Text>
+              </View>
+
+              {/* 4 Dimensions */}
+              <View style={styles.col}>
+                <Text style={styles.subheading}>Les 4 dimensions de personnalite</Text>
+                {mbti.dimensions.map((d, i) => (
+                  <View key={i} style={{ marginBottom: 6 }}>
+                    <View style={[styles.row, { justifyContent: "space-between" }]}>
+                      <Text style={[styles.textSmall, styles.bold]}>
+                        {d.letterLeft} — {d.labelLeft}
+                      </Text>
+                      <Text style={[styles.textSmall, styles.bold, { color: COLORS.muted }]}>
+                        {d.labelRight} — {d.letterRight}
+                      </Text>
+                    </View>
+                    <View style={[styles.row, { alignItems: "center", marginTop: 2 }]}>
+                      <Text style={{ fontSize: 7, fontWeight: 700, width: 22, color: d.leftPct > d.rightPct ? "#0E7490" : COLORS.muted }}>
+                        {d.leftPct}%
+                      </Text>
+                      <View style={{ flex: 1, height: 6, backgroundColor: "#E2E8F0", borderRadius: 3, flexDirection: "row", overflow: "hidden" }}>
+                        <View style={{ width: `${d.leftPct}%`, height: 6, backgroundColor: d.leftPct > d.rightPct ? "#06B6D4" : "#CBD5E1" }} />
+                        <View style={{ width: `${d.rightPct}%`, height: 6, backgroundColor: d.rightPct > d.leftPct ? "#06B6D4" : "#CBD5E1" }} />
+                      </View>
+                      <Text style={{ fontSize: 7, fontWeight: 700, width: 22, textAlign: "right", color: d.rightPct > d.leftPct ? "#0E7490" : COLORS.muted }}>
+                        {d.rightPct}%
+                      </Text>
+                    </View>
+                    <Text style={[styles.textSmall, { fontStyle: "italic", marginTop: 2, color: COLORS.muted }]}>
+                      {d.description}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Strengths + weaknesses */}
+            <View style={[styles.row, { marginTop: 10 }]}>
+              <View style={[styles.twoCol, { padding: 7, backgroundColor: "#F0FDF4", borderRadius: 4, borderLeftWidth: 3, borderLeftColor: COLORS.emerald }]}>
+                <Text style={{ fontSize: 8, fontWeight: 700, color: COLORS.emeraldDark, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 4 }}>
+                  Forces du profil
+                </Text>
+                {mbti.strengths.map((s, i) => (
+                  <View key={i} style={{ flexDirection: "row", marginBottom: 1 }}>
+                    <Text style={{ fontSize: 8, color: COLORS.emerald, marginRight: 4 }}>*</Text>
+                    <Text style={styles.textSmall}>{s}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={[styles.col, { padding: 7, backgroundColor: "#FEF3C7", borderRadius: 4, borderLeftWidth: 3, borderLeftColor: COLORS.amber }]}>
+                <Text style={{ fontSize: 8, fontWeight: 700, color: COLORS.amberDark, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 4 }}>
+                  Points de vigilance
+                </Text>
+                {mbti.weaknesses.map((w, i) => (
+                  <View key={i} style={{ flexDirection: "row", marginBottom: 1 }}>
+                    <Text style={{ fontSize: 8, color: COLORS.amber, marginRight: 4 }}>*</Text>
+                    <Text style={styles.textSmall}>{w}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* Career + filière + advice */}
+            <View style={[styles.row, { marginTop: 8 }]}>
+              <View style={[styles.twoCol, styles.card, { backgroundColor: "#EFF6FF", borderWidth: 1, borderColor: "#BFDBFE" }]}>
+                <Text style={{ fontSize: 8, fontWeight: 700, color: "#1E40AF", textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 4 }}>
+                  Metiers compatibles
+                </Text>
+                {mbti.recommendedCareers.slice(0, 4).map((c, i) => (
+                  <Text key={i} style={[styles.textSmall, { marginBottom: 1 }]}>* {c}</Text>
+                ))}
+              </View>
+              <View style={[styles.twoCol, styles.card, { backgroundColor: "#FAF5FF", borderWidth: 1, borderColor: "#E9D5FF" }]}>
+                <Text style={{ fontSize: 8, fontWeight: 700, color: COLORS.purpleDark, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 4 }}>
+                  Filieres BAC suggerees
+                </Text>
+                {mbti.recommendedFilieres.map((f, i) => (
+                  <Text key={i} style={[styles.textSmall, { marginBottom: 1 }]}>* {f}</Text>
+                ))}
+              </View>
+              <View style={[styles.col, styles.card, { backgroundColor: "#ECFEFF", borderWidth: 1, borderColor: "#A5F3FC" }]}>
+                <Text style={{ fontSize: 8, fontWeight: 700, color: "#0E7490", textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 4 }}>
+                  Conseil d&apos;etude
+                </Text>
+                <Text style={styles.textSmall}>{mbti.studyAdvice}</Text>
+              </View>
+            </View>
+
+            <InterpretBox
+              title="Qu'est-ce que le MBTI ?"
+              text="Le MBTI (Myers-Briggs Type Indicator) est un indicateur de personnalite base sur la theorie psychologique de Carl Jung (Types Psychologiques, 1921), operationnalise par Katharine Cook Briggs et Isabel Briggs Myers (1944). Il evalue 4 dimensions : E/I (Extraversion/Introversion), S/N (Sensation/Intuition), T/F (Thinking/Feeling), J/P (Judging/Perceiving). La combinaison donne 16 types possibles. Pour les parents : c'est un outil indicatif qui complete le profil d'intelligences (Gardner) pour une orientation eclairee."
+              borderColor="#06B6D4"
+              bg="#ECFEFF"
+              titleColor="#0E7490"
+            />
+          </>
+        )}
+
+        <Text style={styles.footer}>
+          Page 3/5 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+        </Text>
+      </Page>
+
+      {/* ═══════════════════════════════════════════════════════════
+         PAGE 4 — ORIENTATION + CAREERS + UNIVERSITIES
          ═══════════════════════════════════════════════════════════ */}
       <Page size="A4" style={styles.page}>
         <SectionBanner
@@ -920,7 +1073,7 @@ export function ScientificReportPdf({
         />
 
         <Text style={styles.footer}>
-          Page 3/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+          Page 4/5 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
         </Text>
       </Page>
 
@@ -1095,7 +1248,7 @@ export function ScientificReportPdf({
         </View>
 
         <Text style={styles.footer}>
-          Page 4/4 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+          Page 5/5 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
         </Text>
       </Page>
     </Document>

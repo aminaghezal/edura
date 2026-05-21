@@ -20,8 +20,8 @@ const FEATURES = [
   },
   {
     icon: <Brain className="w-5 h-5" />,
-    title: "Intelligence Artificielle",
-    desc: "Détection automatique des élèves à risque + suggestions d'orientation par filière.",
+    title: "Rapport Scientifique d'Orientation",
+    desc: "Bilan pédagogique complet de l'élève : intelligences multiples (Gardner), MBTI, prédiction de filière BAC, métiers et universités algériennes.",
     featured: true,
   },
   {
@@ -38,8 +38,8 @@ const FEATURES = [
   },
   {
     icon: <CalendarCheck className="w-5 h-5" />,
-    title: "Présences quotidiennes",
-    desc: "Appel en grille, statistiques en temps réel, alertes parents automatiques.",
+    title: "Suivi présences temps réel",
+    desc: "Appel quotidien en grille + rapport mensuel imprimable. Statistiques en direct, alertes parents automatiques.",
     featured: false,
   },
   {

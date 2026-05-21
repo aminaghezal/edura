@@ -184,9 +184,6 @@ model Student {
  iqScore Int? // 70-160, standard IQ test
  iqTestName String? // "WISC-V", "Stanford-Binet", "Raven", etc.
  iqTestDate DateTime?
- mbtiType String? // "INTJ", "ENFP", etc. (16 types Myers-Briggs)
- mbtiTestDate DateTime?
- photoUrl String? // Profile picture (Supabase Storage or external)
  hobbies String? // comma-separated: "lecture,échecs,football"
  interests String? // comma-separated: "sciences,art,technologie"
  learningStyle LearningStyle?
