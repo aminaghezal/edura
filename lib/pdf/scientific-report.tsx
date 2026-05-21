@@ -18,6 +18,7 @@ import {
   Circle,
   Path,
   G,
+  Image,
 } from "@react-pdf/renderer";
 import type { ScientificReport } from "@/lib/orientation/profile";
 import type { MBTIProfile } from "@/lib/orientation/mbti";
@@ -119,6 +120,34 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 1,
     borderColor: COLORS.border,
+  },
+  studentPhotoBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  studentPhoto: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: COLORS.indigo,
+    objectFit: "cover",
+  },
+  studentPhotoPlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: COLORS.indigo,
+    backgroundColor: "#EEF2FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  studentPhotoInitial: {
+    fontSize: 28,
+    fontWeight: 700,
+    color: COLORS.indigo,
   },
   studentInfoRow: { fontSize: 8, marginBottom: 2 },
   studentInfoLabel: { color: COLORS.muted, fontSize: 7 },
@@ -463,6 +492,7 @@ function GpaSparkline({ data, width = 200, height = 60 }: {
 export type ScientificPdfProps = {
   report: ScientificReport;
   mbti: MBTIProfile | null;
+  photoUrl?: string | null;
   school: { name: string; wilaya: string; director: string };
   year: string;
 };
@@ -470,6 +500,7 @@ export type ScientificPdfProps = {
 export function ScientificReportPdf({
   report,
   mbti,
+  photoUrl,
   school,
   year,
 }: ScientificPdfProps) {
@@ -496,27 +527,49 @@ export function ScientificReportPdf({
               {school.name} - {school.wilaya}
             </Text>
           </View>
-          <View style={styles.studentInfoBox}>
-            <View style={styles.studentInfoRow}>
-              <Text style={styles.studentInfoLabel}>Nom complet</Text>
-              <Text style={styles.studentInfoValue}>{report.meta.studentName}</Text>
-            </View>
-            <View style={styles.studentInfoRow}>
-              <Text style={styles.studentInfoLabel}>Classe</Text>
-              <Text style={styles.studentInfoValue}>{report.meta.className}</Text>
-            </View>
-            <View style={styles.studentInfoRow}>
-              <Text style={styles.studentInfoLabel}>Annee scolaire</Text>
-              <Text style={styles.studentInfoValue}>{year}</Text>
-            </View>
-            {report.meta.iq.score && (
-              <View style={styles.studentInfoRow}>
-                <Text style={styles.studentInfoLabel}>QI mesure</Text>
-                <Text style={[styles.studentInfoValue, { color: COLORS.indigo }]}>
-                  {report.meta.iq.score} ({report.meta.iq.interpretation})
+          <View style={styles.studentPhotoBox}>
+            {/* Student photo */}
+            {photoUrl ? (
+              <Image src={photoUrl} style={styles.studentPhoto} />
+            ) : (
+              <View style={styles.studentPhotoPlaceholder}>
+                <Text style={styles.studentPhotoInitial}>
+                  {report.meta.studentName.charAt(0).toUpperCase()}
                 </Text>
               </View>
             )}
+
+            {/* Info column */}
+            <View style={[styles.studentInfoBox, { width: 130 }]}>
+              <View style={styles.studentInfoRow}>
+                <Text style={styles.studentInfoLabel}>Nom complet</Text>
+                <Text style={styles.studentInfoValue}>{report.meta.studentName}</Text>
+              </View>
+              <View style={styles.studentInfoRow}>
+                <Text style={styles.studentInfoLabel}>Classe</Text>
+                <Text style={styles.studentInfoValue}>{report.meta.className}</Text>
+              </View>
+              <View style={styles.studentInfoRow}>
+                <Text style={styles.studentInfoLabel}>Annee scolaire</Text>
+                <Text style={styles.studentInfoValue}>{year}</Text>
+              </View>
+              {report.meta.iq.score && (
+                <View style={styles.studentInfoRow}>
+                  <Text style={styles.studentInfoLabel}>QI mesure</Text>
+                  <Text style={[styles.studentInfoValue, { color: COLORS.indigo }]}>
+                    {report.meta.iq.score}
+                  </Text>
+                </View>
+              )}
+              {mbti && (
+                <View style={styles.studentInfoRow}>
+                  <Text style={styles.studentInfoLabel}>Type MBTI</Text>
+                  <Text style={[styles.studentInfoValue, { color: "#0E7490" }]}>
+                    {mbti.type} — {mbti.nickname}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 

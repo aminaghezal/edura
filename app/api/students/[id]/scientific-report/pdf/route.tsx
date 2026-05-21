@@ -93,6 +93,7 @@ export async function GET(
     <ScientificReportPdf
       report={report}
       mbti={mbtiProfile}
+      photoUrl={student.photoUrl ?? null}
       school={school ?? { name: "École", wilaya: "", director: "" }}
       year={year?.name ?? "2025-2026"}
     />,
