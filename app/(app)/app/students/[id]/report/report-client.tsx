@@ -1082,6 +1082,24 @@ export function ReportClient({
           </CardContent>
         </Card>
 
+        {/* ─── Vision photo: EDURA Institution building (shown in print) ── */}
+        <Card className="overflow-hidden border-2 border-indigo-200">
+          <CardContent className="p-0 relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/edura-institution.png"
+              alt="Vue d'artiste — Future Institution EDURA"
+              className="w-full h-auto object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+              <div className="text-white text-sm font-bold">L&apos;INSTITUTION EDURA — Vue d&apos;artiste</div>
+              <div className="text-white/80 text-xs italic">
+                « Au-delà du rapport scolaire — Vers une école d&apos;élite ouverte à tous les talents algériens. »
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-2 pb-4 print:pt-6">
           Document généré automatiquement par EDURA — {new Date(report.meta.generatedAt).toLocaleString("fr-FR")}

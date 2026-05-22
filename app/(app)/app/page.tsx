@@ -123,19 +123,12 @@ export default async function DashboardPage() {
       {/* ── Header ── */}
       <div className="flex items-end justify-between flex-wrap gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
         <div>
-          <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
-            Bonjour, {session.name.split(" ")[0]} 👋
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Vue d&apos;ensemble de votre établissement en temps réel
+          <h1 className="text-3xl font-bold tracking-tight">
+            Bonjour, {session.name.split(" ")[0]}.
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            Voici ce qui se passe dans votre école aujourd&apos;hui.
           </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Système actif
-          </span>
         </div>
       </div>
 
@@ -207,9 +200,9 @@ export default async function DashboardPage() {
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs uppercase tracking-wide font-bold text-indigo-700">
-                        Assistant IA — Résumé hebdomadaire
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
+                        Ce que l&apos;assistant a remarqué cette semaine
                       </span>
                       <Badge variant="secondary" className="text-[10px] h-5">
                         Beta

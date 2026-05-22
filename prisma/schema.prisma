@@ -197,9 +197,49 @@ model Student {
  payments Payment[]
  observations StudentObservation[]
  orientationReports OrientationReport[]
+ testSessions TestSession[]
+ testResults TestResult[]
  @@index([schoolId, classId])
  @@index([riskLevel])
  @@map("students")
+}
+
+// ============================================================
+// EDURA TEST (tablet app) — sessions + results
+// ============================================================
+model TestSession {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId     String     @map("student_id")
+  student       Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  attemptNumber Int        @default(1) @map("attempt_number")
+  status        String     @default("in_progress") // "in_progress" | "completed"
+  startedAt     DateTime   @default(now()) @map("started_at") @db.Timestamptz
+  completedAt   DateTime?  @map("completed_at") @db.Timestamptz
+  testResult    TestResult?
+
+  @@index([studentId])
+  @@map("test_sessions")
+}
+
+model TestResult {
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId            String      @unique @map("session_id") @db.Uuid
+  session              TestSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId            String      @map("student_id")
+  student              Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  mbtiType             String?     @map("mbti_type")
+  mbtiScores           Json?       @map("mbti_scores")
+  iqScore              Int?        @map("iq_score")
+  iqLevel              String?     @map("iq_level")
+  iqPercentile         Int?        @map("iq_percentile")
+  dominantIntelligence String?     @map("dominant_intelligence")
+  intelligenceScores   Json?       @map("intelligence_scores")
+  careerLiked          String[]    @map("career_liked")
+  careerTopMatch       String?     @map("career_top_match")
+  submittedAt          DateTime    @default(now()) @map("submitted_at") @db.Timestamptz
+
+  @@index([studentId])
+  @@map("test_results")
 }
 enum RiskLevel {
  LOW

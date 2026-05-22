@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AnimatedCounter } from "./animated-counter";
 import { Sparkline } from "./sparkline";
-import { ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { ArrowUp, ArrowDown } from "lucide-react";
 
 type Props = {
   label: string;
@@ -17,18 +17,47 @@ type Props = {
   accent?: "primary" | "emerald" | "amber" | "red" | "indigo";
 };
 
-const accents: Record<NonNullable<Props["accent"]>, string> = {
-  primary:
-    "from-indigo-500/10 to-indigo-500/5 text-indigo-700 dark:from-indigo-400/15 dark:to-indigo-400/5 dark:text-indigo-300",
-  emerald:
-    "from-emerald-500/10 to-emerald-500/5 text-emerald-700 dark:from-emerald-400/20 dark:to-emerald-400/5 dark:text-emerald-300",
-  amber:
-    "from-amber-500/10 to-amber-500/5 text-amber-700 dark:from-amber-400/15 dark:to-amber-400/5 dark:text-amber-300",
-  red:
-    "from-red-500/10 to-red-500/5 text-red-700 dark:from-red-400/20 dark:to-red-400/5 dark:text-red-300",
-  indigo:
-    "from-indigo-500/10 to-indigo-500/5 text-indigo-700 dark:from-indigo-400/15 dark:to-indigo-400/5 dark:text-indigo-300",
+const accents: Record<NonNullable<Props["accent"]>, { soft: string; ring: string; iconColor: string }> = {
+  primary: {
+    soft: "bg-indigo-50/60 dark:bg-indigo-950/20",
+    ring: "ring-indigo-100 dark:ring-indigo-900/40",
+    iconColor: "text-indigo-500",
+  },
+  emerald: {
+    soft: "bg-emerald-50/60 dark:bg-emerald-950/20",
+    ring: "ring-emerald-100 dark:ring-emerald-900/40",
+    iconColor: "text-emerald-500",
+  },
+  amber: {
+    soft: "bg-amber-50/60 dark:bg-amber-950/20",
+    ring: "ring-amber-100 dark:ring-amber-900/40",
+    iconColor: "text-amber-500",
+  },
+  red: {
+    soft: "bg-red-50/60 dark:bg-red-950/20",
+    ring: "ring-red-100 dark:ring-red-900/40",
+    iconColor: "text-red-500",
+  },
+  indigo: {
+    soft: "bg-indigo-50/60 dark:bg-indigo-950/20",
+    ring: "ring-indigo-100 dark:ring-indigo-900/40",
+    iconColor: "text-indigo-500",
+  },
 };
+
+// Vary the delta wording so the dashboard doesn't feel like a template
+function phraseDelta(delta: number, accent: NonNullable<Props["accent"]>): string {
+  const abs = Math.abs(delta).toFixed(1).replace(/\.0$/, "");
+  if (delta === 0) return "stable depuis septembre";
+  if (delta > 0) {
+    if (accent === "red") return `${abs}% en plus — à surveiller`;
+    if (delta > 15) return `${abs}% en hausse — belle dynamique`;
+    return `+${abs}% vs septembre`;
+  }
+  if (accent === "emerald") return `${abs}% en baisse — à regarder`;
+  if (delta < -10) return `${abs}% en baisse marquée`;
+  return `−${abs}% vs septembre`;
+}
 
 export function MetricCard({
   label,
@@ -43,30 +72,27 @@ export function MetricCard({
 }: Props) {
   const isUp = delta != null && delta > 0;
   const isDown = delta != null && delta < 0;
-  const isFlat = delta != null && delta === 0;
+  const a = accents[accent];
 
   return (
-    <Card className="relative overflow-hidden border-border/60 hover:border-primary/40 transition-all hover:shadow-md hover:-translate-y-0.5 duration-300 animate-in fade-in slide-in-from-bottom-2 dark:hover:shadow-[0_0_24px_-8px_rgba(167,139,250,0.4)]">
-      {/* Subtle gradient glow */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none ${accents[accent]}`}
-      />
-
-      <CardContent className="relative p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+    <Card
+      className={`group relative border ${a.ring} ring-1 hover:shadow-sm transition-all duration-200 hover:-translate-y-px`}
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div className="text-sm text-muted-foreground font-medium">
             {label}
           </div>
           {icon && (
-            <div className={`opacity-70 ${accents[accent].split(" ").slice(-1)}`}>
+            <div className={`w-9 h-9 rounded-lg grid place-items-center ${a.soft} ${a.iconColor}`}>
               {icon}
             </div>
           )}
         </div>
 
         <div className="flex items-end justify-between gap-3">
-          <div>
-            <div className="text-3xl font-bold tracking-tight">
+          <div className="min-w-0">
+            <div className="text-[2rem] font-semibold tracking-tight leading-none text-foreground">
               <AnimatedCounter
                 value={value}
                 prefix={prefix}
@@ -75,33 +101,35 @@ export function MetricCard({
               />
             </div>
             {delta != null && (
-              <div className="flex items-center gap-1 mt-1.5 text-xs font-semibold">
-                {isUp && <ArrowUp className="w-3 h-3 text-emerald-600" />}
-                {isDown && <ArrowDown className="w-3 h-3 text-red-600" />}
-                {isFlat && <Minus className="w-3 h-3 text-muted-foreground" />}
-                <span
-                  className={
-                    isUp
-                      ? "text-emerald-600"
-                      : isDown
-                        ? "text-red-600"
-                        : "text-muted-foreground"
-                  }
-                >
-                  {Math.abs(delta).toFixed(1)}%
-                </span>
-                <span className="text-muted-foreground font-normal">
-                  vs mois dernier
+              <div className="flex items-center gap-1.5 mt-2 text-xs">
+                {isUp && (
+                  <ArrowUp
+                    className={`w-3 h-3 ${accent === "red" ? "text-red-500" : "text-emerald-500"}`}
+                  />
+                )}
+                {isDown && (
+                  <ArrowDown
+                    className={`w-3 h-3 ${accent === "emerald" ? "text-amber-500" : "text-muted-foreground"}`}
+                  />
+                )}
+                <span className="text-muted-foreground">
+                  {phraseDelta(delta, accent)}
                 </span>
               </div>
             )}
           </div>
 
           {sparklineData && sparklineData.length > 1 && (
-            <div className="w-24 h-12 flex-shrink-0">
+            <div className="w-20 h-10 flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
               <Sparkline
                 data={sparklineData}
-                color={isDown ? "#dc2626" : "#059669"}
+                color={
+                  accent === "red"
+                    ? "#dc2626"
+                    : accent === "amber"
+                      ? "#d97706"
+                      : "#10b981"
+                }
               />
             </div>
           )}

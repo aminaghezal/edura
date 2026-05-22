@@ -30,20 +30,32 @@ export function Hero() {
               décrochage avant qu&apos;il ne soit trop tard.
             </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3">
+            <div className="mt-10 flex flex-col gap-3 max-w-md">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/signup"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl gradient-bg px-7 h-14 text-[15px] font-medium text-white shadow-accent-sm hover:shadow-accent-lg hover:-translate-y-0.5 hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex-1"
+                >
+                  Démarrer l&apos;essai gratuit
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <a
+                  href="#how"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-7 h-14 text-[15px] font-medium text-[#0f172a] hover:border-[#0052ff]/30 hover:shadow-md transition-all duration-200"
+                >
+                  Voir une démo
+                </a>
+              </div>
+              {/* "Already a customer?" — login button under the primary CTA */}
               <Link
-                href="/signup"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl gradient-bg px-7 h-14 text-[15px] font-medium text-white shadow-accent-sm hover:shadow-accent-lg hover:-translate-y-0.5 hover:brightness-110 active:scale-[0.98] transition-all duration-200"
+                href="/login"
+                className="group inline-flex items-center justify-center gap-2 text-[14px] text-[#64748b] hover:text-[#0052ff] transition-colors py-2"
               >
-                Démarrer l&apos;essai gratuit
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span>Vous avez déjà un compte ?</span>
+                <span className="font-semibold underline-offset-4 group-hover:underline">
+                  Se connecter
+                </span>
               </Link>
-              <a
-                href="#how"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-7 h-14 text-[15px] font-medium text-[#0f172a] hover:border-[#0052ff]/30 hover:shadow-md transition-all duration-200"
-              >
-                Voir une démo
-              </a>
             </div>
 
             {/* Trust signals */}

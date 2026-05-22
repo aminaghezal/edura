@@ -28,8 +28,20 @@ export function TopBar({ userName }: { userName: string }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [today, setToday] = useState("");
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Compute the date client-side only to avoid SSR/CSR hydration drift
+  useEffect(() => {
+    setToday(
+      new Date().toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      }),
+    );
+  }, []);
 
   // Cmd+K shortcut to focus search
   useEffect(() => {
@@ -132,12 +144,12 @@ export function TopBar({ userName }: { userName: string }) {
           )}
         </div>
 
-        {/* System status indicators */}
-        <div className="hidden lg:flex items-center gap-3 mr-2">
-          <StatusPill label="API" status="ok" />
-          <StatusPill label="DB" status="ok" />
-          <StatusPill label="IA" status="ok" />
-        </div>
+        {/* Subtle today indicator — replaces the noisy API/DB/IA pills */}
+        {today && (
+          <div className="hidden lg:flex items-center gap-2 mr-3 text-xs text-muted-foreground">
+            <span className="capitalize">{today}</span>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div className="flex items-center gap-1">
@@ -251,33 +263,6 @@ export function TopBar({ userName }: { userName: string }) {
         </div>
       </div>
     </header>
-  );
-}
-
-function StatusPill({
-  label,
-  status,
-}: {
-  label: string;
-  status: "ok" | "warn" | "err";
-}) {
-  const colors = {
-    ok: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-    warn: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
-    err: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30",
-  };
-  const dot = {
-    ok: "bg-emerald-500",
-    warn: "bg-amber-500",
-    err: "bg-red-500",
-  };
-  return (
-    <div
-      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-mono font-semibold uppercase tracking-wider ${colors[status]}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full ${dot[status]} animate-pulse`} />
-      {label}
-    </div>
   );
 }
 
