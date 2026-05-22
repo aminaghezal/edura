@@ -4,6 +4,26 @@ import { prisma } from "@/lib/prisma";
 import { generateScientificReport } from "@/lib/orientation/profile";
 import { ReportClient } from "./report-client";
 
+// Force fresh data each time so tablet results show up the moment the
+// teacher refreshes the report page (no stale ISR cache).
+export const dynamic = "force-dynamic";
+
+type TestResultRow = {
+  id: string;
+  session_id: string;
+  student_id: string;
+  mbti_type: string | null;
+  mbti_scores: { E?: number; I?: number; S?: number; N?: number; T?: number; F?: number; J?: number; P?: number } | null;
+  iq_score: number | null;
+  iq_level: string | null;
+  iq_percentile: number | null;
+  dominant_intelligence: string | null;
+  intelligence_scores: Record<string, number> | null;
+  career_liked: string[] | null;
+  career_top_match: string | null;
+  submitted_at: Date;
+};
+
 export default async function ScientificReportPage({
   params,
 }: {
@@ -22,6 +42,32 @@ export default async function ScientificReportPage({
     },
   });
   if (!student) notFound();
+
+  // ─── Fetch latest EDURA Test result via raw SQL (test_results isn't in Prisma) ──
+  let latestTestResult: TestResultRow | null = null;
+  let testAttemptCount = 0;
+  try {
+    const rows = await prisma.$queryRaw<TestResultRow[]>`
+      SELECT tr.*
+      FROM test_results tr
+      JOIN test_sessions ts ON ts.id = tr.session_id
+      WHERE tr.student_id = ${studentId}
+        AND ts.status = 'completed'
+      ORDER BY tr.submitted_at DESC
+      LIMIT 1
+    `;
+    latestTestResult = rows[0] ?? null;
+
+    const countRows = await prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*)::bigint as count
+      FROM test_sessions
+      WHERE student_id = ${studentId} AND status = 'completed'
+    `;
+    testAttemptCount = Number(countRows[0]?.count ?? 0);
+  } catch (e) {
+    // tables might not exist yet in some envs — fail soft
+    console.warn("[report] could not fetch test_results:", e);
+  }
 
   const [grades, observations, school, subjects] = await Promise.all([
     prisma.grade.findMany({
@@ -57,7 +103,6 @@ export default async function ScientificReportPage({
     }),
   ]);
 
-  // Extract available filieres from the school's classes
   const classes = await prisma.class.findMany({
     where: { schoolId: session.schoolId },
     select: { cycle: true },
@@ -66,7 +111,8 @@ export default async function ScientificReportPage({
     new Set(classes.map((c) => c.cycle).filter((c): c is string => !!c)),
   );
 
-  // Generate the report
+  // Generate the report — passes test result so the orientation engine can use
+  // the actual intelligence scores from the tablet test (instead of estimating from grades)
   const report = generateScientificReport({
     student: {
       firstName: student.firstName,
@@ -74,7 +120,7 @@ export default async function ScientificReportPage({
       firstNameAr: student.firstNameAr,
       lastNameAr: student.lastNameAr,
       className: student.class?.name ?? null,
-      iqScore: student.iqScore,
+      iqScore: latestTestResult?.iq_score ?? student.iqScore,
       learningStyle: student.learningStyle,
       hobbies: student.hobbies,
       interests: student.interests,
@@ -92,6 +138,11 @@ export default async function ScientificReportPage({
       intelligenceTags: o.intelligenceTags,
     })),
     availableFilieres,
+    // ↓ Tablet test signals take priority when present
+    testResultIntelligenceScores: latestTestResult?.intelligence_scores ?? null,
+    mbtiType: latestTestResult?.mbti_type ?? student.mbtiType,
+    tabletCareerLiked: latestTestResult?.career_liked ?? null,
+    tabletCareerTopMatch: latestTestResult?.career_top_match ?? null,
   });
 
   return (
@@ -102,11 +153,11 @@ export default async function ScientificReportPage({
         lastName: student.lastName,
         firstNameAr: student.firstNameAr ?? "",
         lastNameAr: student.lastNameAr ?? "",
-        iqScore: student.iqScore,
-        iqTestName: student.iqTestName,
-        iqTestDate: student.iqTestDate?.toISOString() ?? null,
-        mbtiType: student.mbtiType,
-        mbtiTestDate: student.mbtiTestDate?.toISOString() ?? null,
+        iqScore: latestTestResult?.iq_score ?? student.iqScore,
+        iqTestName: latestTestResult ? "EDURA Test (interne)" : student.iqTestName,
+        iqTestDate: (latestTestResult?.submitted_at ?? student.iqTestDate)?.toISOString() ?? null,
+        mbtiType: latestTestResult?.mbti_type ?? student.mbtiType,
+        mbtiTestDate: (latestTestResult?.submitted_at ?? student.mbtiTestDate)?.toISOString() ?? null,
         photoUrl: student.photoUrl,
         learningStyle: student.learningStyle,
         hobbies: student.hobbies,
@@ -124,6 +175,23 @@ export default async function ScientificReportPage({
       }))}
       subjects={subjects}
       school={school ?? { name: "École", wilaya: "", director: "" }}
+      testResult={
+        latestTestResult
+          ? {
+              mbtiType: latestTestResult.mbti_type,
+              mbtiScores: latestTestResult.mbti_scores,
+              iqScore: latestTestResult.iq_score,
+              iqLevel: latestTestResult.iq_level,
+              iqPercentile: latestTestResult.iq_percentile,
+              dominantIntelligence: latestTestResult.dominant_intelligence,
+              intelligenceScores: latestTestResult.intelligence_scores,
+              careerLiked: latestTestResult.career_liked,
+              careerTopMatch: latestTestResult.career_top_match,
+              submittedAt: latestTestResult.submitted_at.toISOString(),
+              attemptCount: testAttemptCount,
+            }
+          : null
+      }
     />
   );
 }

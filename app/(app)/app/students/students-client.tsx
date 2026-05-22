@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { createStudent } from "./actions";
+import { createStudent, updateStudentBirthday } from "./actions";
 
 type Student = {
   id: string;
@@ -32,6 +32,7 @@ type Student = {
   lastName: string;
   firstNameAr: string | null;
   lastNameAr: string | null;
+  birthDate: string | null; // YYYY-MM-DD (already serialized in page.tsx)
   parentName: string | null;
   parentPhone: string | null;
   riskLevel: "LOW" | "MODERATE" | "HIGH" | null;
@@ -172,18 +173,32 @@ export function StudentsClient({
                     <Input id="lastNameAr" name="lastNameAr" dir="rtl" />
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="classId">Classe</Label>
-                  <select
-                    id="classId"
-                    name="classId"
-                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
-                  >
-                    <option value="">— Aucune —</option>
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="classId">Classe</Label>
+                    <select
+                      id="classId"
+                      name="classId"
+                      className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                    >
+                      <option value="">— Aucune —</option>
+                      {classes.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="birthDate">Date de naissance</Label>
+                    <Input
+                      id="birthDate"
+                      name="birthDate"
+                      type="date"
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Sert de code d&apos;accès sur la tablette EDURA Test
+                    </p>
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="parentName">Nom du parent</Label>
@@ -344,6 +359,7 @@ export function StudentsClient({
                 <TableRow>
                   <TableHead>Nom</TableHead>
                   <TableHead>Classe</TableHead>
+                  <TableHead>Date de naissance</TableHead>
                   <TableHead>Risque</TableHead>
                   <TableHead>Parent</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -363,6 +379,9 @@ export function StudentsClient({
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {s.class?.name ?? "—"}
+                      </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <BirthdayCell studentId={s.id} initialYmd={s.birthDate} />
                       </TableCell>
                       <TableCell>
                         {risk ? <Badge variant={risk.variant}>{risk.fr}</Badge> : <span className="text-muted-foreground text-xs">—</span>}
@@ -426,6 +445,14 @@ export function StudentsClient({
 
               <div className="space-y-3 text-sm">
                 <Row label="Risque" value={selected.riskLevel ? riskLabel[selected.riskLevel].fr : "—"} />
+                <Row
+                  label="Naissance"
+                  value={
+                    selected.birthDate
+                      ? new Date(selected.birthDate).toLocaleDateString("fr-FR")
+                      : "Non renseignée"
+                  }
+                />
                 <Row label="Parent" value={selected.parentName ?? "—"} />
                 <Row label="Téléphone" value={selected.parentPhone ?? "—"} />
               </div>
@@ -459,6 +486,55 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
     <div className="flex justify-between items-center">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-semibold">{value}</span>
+    </div>
+  );
+}
+
+// Inline-editable date input — auto-saves on change.
+// Status icon: ⏳ saving · ✅ saved · ⚠️ empty
+function BirthdayCell({
+  studentId,
+  initialYmd,
+}: {
+  studentId: string;
+  initialYmd: string | null;
+}) {
+  const router = useRouter();
+  const [value, setValue] = useState(initialYmd ?? "");
+  const [status, setStatus] = useState<"idle" | "saving" | "ok" | "err">("idle");
+  const [, startTransition] = useTransition();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const ymd = e.target.value;
+    setValue(ymd);
+    setStatus("saving");
+    startTransition(async () => {
+      const res = await updateStudentBirthday(studentId, ymd || null);
+      if (res.ok) {
+        setStatus("ok");
+        router.refresh();
+        setTimeout(() => setStatus("idle"), 1200);
+      } else {
+        setStatus("err");
+      }
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="date"
+        value={value}
+        onChange={handleChange}
+        max={new Date().toISOString().split("T")[0]}
+        className="h-8 px-2 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+      />
+      <span className="text-base w-4 inline-block text-center" aria-hidden>
+        {status === "saving" && "⏳"}
+        {status === "ok" && "✅"}
+        {status === "err" && "⚠️"}
+        {status === "idle" && !value && <span className="text-amber-500" title="Date manquante">⚠️</span>}
+      </span>
     </div>
   );
 }

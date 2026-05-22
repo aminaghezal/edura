@@ -72,7 +72,232 @@ export type ReportInput = {
   }[];
   // Algerian context
   availableFilieres: string[];
+  // ↓ When the student has taken the EDURA Test on the tablet, these scores
+  //   override the grade-based estimation. Keys come from the tablet's tests:
+  //   "Linguistic" | "Logical-Mathematical" | "Spatial" | "Musical"
+  //   | "Bodily-Kinesthetic" | "Interpersonal" | "Intrapersonal" | "Naturalist"
+  testResultIntelligenceScores?: Record<string, number> | null;
+  // ↓ Tablet signals used by the unified career-matching algorithm
+  mbtiType?: string | null;                  // e.g. "ENFP"
+  tabletCareerLiked?: string[] | null;       // career ids the student swiped right on
+  tabletCareerTopMatch?: string | null;      // the tablet's suggested top career
 };
+
+// Map tablet intelligence keys to internal IntelligenceType
+const TABLET_TO_INTERNAL: Record<string, IntelligenceType> = {
+  Linguistic: "LINGUISTIC",
+  "Logical-Mathematical": "LOGICAL",
+  Spatial: "SPATIAL",
+  Musical: "MUSICAL",
+  "Bodily-Kinesthetic": "BODILY",
+  Interpersonal: "INTERPERSONAL",
+  Intrapersonal: "INTRAPERSONAL",
+  Naturalist: "NATURALIST",
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// Career compatibility scaffolding (used by the unified career algorithm)
+// ──────────────────────────────────────────────────────────────────────
+//
+// CAREER_PROFILE = per-career signals required for a "perfect fit":
+//   - mbtiTypes   : MBTI types most naturally drawn to this work
+//   - intelligence: dominant Gardner intelligence(s) the career calls upon
+//   - subjectCode : academic subjects that must be strong (>= 12/20)
+//   - minIqScore  : approximate minimum recommended IQ
+//
+// The unified score is a weighted sum of: filière match (academic) +
+// MBTI fit + intelligence fit + IQ fit + expressed preference (tablet swipe)
+// + teacher observations (intelligenceTags). It will never recommend
+// "musician" for an academic-strong ENFP unless the student actively swiped
+// right on it AND it's in their MBTI-compatible career set.
+
+type CareerProfile = {
+  id: string;            // matches tablet `careers.ts` ids
+  title: string;
+  studies: string;
+  filiere: string;       // primary filière
+  mbtiTypes: string[];   // MBTI codes that fit naturally
+  intelligence: IntelligenceType[];
+  subjectCodes: string[]; // subjects that should be strong
+  minIqScore: number;    // soft floor
+};
+
+const CAREER_CATALOG: CareerProfile[] = [
+  // ─── Scientific / Health ──────────────────────────────────────────
+  { id: "doctor", title: "Médecin", studies: "Médecine — 7 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["ISTJ","ISFJ","INTJ","INFJ","ESTJ","ENFJ"],
+    intelligence: ["LOGICAL","INTERPERSONAL","NATURALIST"], subjectCodes: ["svt","phys","math"], minIqScore: 110 },
+  { id: "pharmacist", title: "Pharmacien(ne)", studies: "Pharmacie — 5 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["ISTJ","ISFJ","ESTJ"],
+    intelligence: ["LOGICAL","NATURALIST"], subjectCodes: ["svt","phys"], minIqScore: 105 },
+  { id: "nurse", title: "Infirmier(ère)", studies: "Sciences infirmières — 3 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["ISFJ","ESFJ","ENFJ","INFP"],
+    intelligence: ["INTERPERSONAL","BODILY"], subjectCodes: ["svt"], minIqScore: 95 },
+  { id: "veterinarian", title: "Vétérinaire", studies: "Vétérinaire — 6 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["ISFJ","INFJ","ISFP","INFP"],
+    intelligence: ["NATURALIST","LOGICAL"], subjectCodes: ["svt"], minIqScore: 105 },
+  { id: "psychologist", title: "Psychologue", studies: "Psychologie — 5 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["INFJ","INFP","ENFJ","ENFP","INTJ"],
+    intelligence: ["INTERPERSONAL","INTRAPERSONAL"], subjectCodes: ["philo","svt"], minIqScore: 105 },
+  { id: "biologist", title: "Biologiste", studies: "Sciences biologiques — 5 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["INTJ","INTP","ISFP","ISTP"],
+    intelligence: ["NATURALIST","LOGICAL"], subjectCodes: ["svt","phys"], minIqScore: 105 },
+  { id: "agronomist", title: "Agronome", studies: "Agronomie — 5 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["ISTP","ISFP","ESTP","ESTJ"],
+    intelligence: ["NATURALIST","BODILY"], subjectCodes: ["svt"], minIqScore: 95 },
+
+  // ─── Engineering / Tech ───────────────────────────────────────────
+  { id: "engineer", title: "Ingénieur(e)", studies: "École polytechnique — 5 ans",
+    filiere: "Mathématiques", mbtiTypes: ["INTJ","INTP","ISTJ","ISTP","ENTJ","ENTP"],
+    intelligence: ["LOGICAL","SPATIAL"], subjectCodes: ["math","phys"], minIqScore: 110 },
+  { id: "programmer", title: "Développeur(se) logiciel", studies: "Informatique — 5 ans",
+    filiere: "Mathématiques", mbtiTypes: ["INTJ","INTP","ISTP","ENTP"],
+    intelligence: ["LOGICAL","SPATIAL"], subjectCodes: ["math","info"], minIqScore: 105 },
+  { id: "data_analyst", title: "Analyste de données", studies: "Stats / Data Science — 5 ans",
+    filiere: "Mathématiques", mbtiTypes: ["INTJ","INTP","ISTJ","ENTJ"],
+    intelligence: ["LOGICAL"], subjectCodes: ["math"], minIqScore: 110 },
+  { id: "architect", title: "Architecte", studies: "Architecture — 6 ans",
+    filiere: "Mathématiques", mbtiTypes: ["INTJ","INFJ","ISTP","ISFP","ENFP"],
+    intelligence: ["SPATIAL","LOGICAL"], subjectCodes: ["math","art"], minIqScore: 105 },
+  { id: "pilot", title: "Pilote", studies: "École d'aviation — 4 ans",
+    filiere: "Mathématiques", mbtiTypes: ["ISTP","ESTP","ISTJ","ESTJ"],
+    intelligence: ["SPATIAL","BODILY","LOGICAL"], subjectCodes: ["math","phys"], minIqScore: 110 },
+  { id: "scientist", title: "Scientifique chercheur(se)", studies: "Doctorat — 8 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["INTJ","INTP"],
+    intelligence: ["LOGICAL","NATURALIST"], subjectCodes: ["phys","math","svt"], minIqScore: 120 },
+  { id: "electrician", title: "Électricien(ne)", studies: "Formation pro — 2 ans",
+    filiere: "Sciences expérimentales", mbtiTypes: ["ISTP","ESTP","ISTJ"],
+    intelligence: ["BODILY","LOGICAL"], subjectCodes: ["phys"], minIqScore: 90 },
+
+  // ─── Letters / Languages / Law ────────────────────────────────────
+  { id: "lawyer", title: "Avocat(e)", studies: "Droit — 5 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ENTJ","ESTJ","ENTP","INTJ"],
+    intelligence: ["LINGUISTIC","LOGICAL","INTERPERSONAL"], subjectCodes: ["philo","ar","fr"], minIqScore: 105 },
+  { id: "writer", title: "Auteur(e) / Écrivain(e)", studies: "Lettres — 5 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["INFJ","INFP","INTJ","INTP","ENFP"],
+    intelligence: ["LINGUISTIC","INTRAPERSONAL"], subjectCodes: ["ar","fr","philo"], minIqScore: 100 },
+  { id: "journalist", title: "Journaliste", studies: "Sciences de l'information — 4 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ENTP","ENFP","ENTJ","ESTP"],
+    intelligence: ["LINGUISTIC","INTERPERSONAL"], subjectCodes: ["fr","ar","hg"], minIqScore: 100 },
+  { id: "translator", title: "Traducteur(trice)", studies: "Traduction — 5 ans",
+    filiere: "Langues étrangères", mbtiTypes: ["INFJ","ISFJ","ISTJ","INTJ"],
+    intelligence: ["LINGUISTIC"], subjectCodes: ["fr","en","ar"], minIqScore: 100 },
+  { id: "teacher", title: "Enseignant(e)", studies: "ENS — 4 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ENFJ","ESFJ","ISFJ","INFJ"],
+    intelligence: ["LINGUISTIC","INTERPERSONAL"], subjectCodes: ["fr","ar","math"], minIqScore: 95 },
+
+  // ─── Business / Management ────────────────────────────────────────
+  { id: "entrepreneur", title: "Entrepreneur(e)", studies: "École de commerce — 5 ans",
+    filiere: "Gestion et économie", mbtiTypes: ["ENTJ","ENTP","ESTP","ENFP","INTJ"],
+    intelligence: ["LOGICAL","INTERPERSONAL"], subjectCodes: ["math"], minIqScore: 105 },
+  { id: "accountant", title: "Comptable", studies: "Comptabilité — 3 ans",
+    filiere: "Gestion et économie", mbtiTypes: ["ISTJ","ESTJ","ISFJ"],
+    intelligence: ["LOGICAL"], subjectCodes: ["math"], minIqScore: 95 },
+  { id: "marketer", title: "Spécialiste en marketing", studies: "Marketing — 5 ans",
+    filiere: "Gestion et économie", mbtiTypes: ["ENFP","ENTP","ESFP","ENFJ"],
+    intelligence: ["LINGUISTIC","INTERPERSONAL"], subjectCodes: ["fr","en"], minIqScore: 100 },
+  { id: "civil_servant", title: "Fonctionnaire", studies: "Administration publique — 3 ans",
+    filiere: "Gestion et économie", mbtiTypes: ["ISTJ","ESTJ","ISFJ","ESFJ"],
+    intelligence: ["LOGICAL","INTERPERSONAL"], subjectCodes: ["fr","ar"], minIqScore: 95 },
+
+  // ─── Service / Civic ─────────────────────────────────────────────
+  { id: "policeman", title: "Policier(ère)", studies: "École de police — 2 ans",
+    filiere: "Gestion et économie", mbtiTypes: ["ISTJ","ESTJ","ISTP","ESTP"],
+    intelligence: ["BODILY","INTERPERSONAL"], subjectCodes: ["fr","ar"], minIqScore: 95 },
+  { id: "social_worker", title: "Travailleur(se) social(e)", studies: "Travail social — 3 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ENFJ","INFJ","ESFJ","ISFJ"],
+    intelligence: ["INTERPERSONAL"], subjectCodes: ["philo"], minIqScore: 95 },
+
+  // ─── Arts (only chosen when MBTI + intelligence strongly support it) ─
+  { id: "artist", title: "Artiste / Designer", studies: "Beaux-Arts — 4 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ISFP","INFP","ESFP","ENFP"],
+    intelligence: ["SPATIAL","MUSICAL"], subjectCodes: ["art"], minIqScore: 95 },
+  { id: "musician", title: "Musicien(ne)", studies: "Conservatoire — 4 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ISFP","INFP","ESFP","ENFP"],
+    intelligence: ["MUSICAL"], subjectCodes: ["music","art"], minIqScore: 95 },
+  { id: "filmmaker", title: "Cinéaste", studies: "École de cinéma — 4 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["INFJ","INFP","ENFP","ISFP"],
+    intelligence: ["SPATIAL","LINGUISTIC"], subjectCodes: ["fr","art"], minIqScore: 100 },
+  { id: "chef", title: "Chef cuisinier", studies: "École hôtelière — 3 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ISFP","ESFP","ESTP","ISTP"],
+    intelligence: ["BODILY","SPATIAL"], subjectCodes: [], minIqScore: 95 },
+  { id: "athlete", title: "Athlète professionnel(le)", studies: "Sport-études — 4 ans",
+    filiere: "Lettres et philosophie", mbtiTypes: ["ESTP","ISTP","ESFP","ISFP"],
+    intelligence: ["BODILY"], subjectCodes: ["sport"], minIqScore: 90 },
+];
+
+// Score a single career against all known signals.
+// Returns a [score, reasoning[]] tuple — reasoning is shown to the parent in the report.
+function scoreCareerFor(
+  c: CareerProfile,
+  ctx: {
+    bestSubjects: { name: string; gpa: number }[];
+    weakSubjects: { name: string; gpa: number }[];
+    subjectAvgByCode: Map<string, number>;
+    mbtiType: string | null;
+    topIntelligence: IntelligenceType | null;
+    iqScore: number | null;
+    tabletLiked: Set<string>;
+    tabletTop: string | null;
+    observationTags: Set<IntelligenceType>;
+    topFiliereName: string;
+  },
+): { score: number; reasoning: string[] } {
+  let score = 50; // baseline so unrelated careers don't tie at 0
+  const reasoning: string[] = [];
+
+  // 1. Filière alignment (the strongest signal — academic strength is everything)
+  if (c.filiere === ctx.topFiliereName) {
+    score += 40;
+    reasoning.push(`aligné avec la filière recommandée (${c.filiere})`);
+  } else {
+    score -= 15; // discourage but don't kill
+  }
+
+  // 2. Subject performance — each required subject the student is strong in (>= 12/20)
+  for (const code of c.subjectCodes) {
+    const avg = ctx.subjectAvgByCode.get(code);
+    if (typeof avg === "number") {
+      if (avg >= 14) { score += 15; reasoning.push(`fort(e) en matière clé (${avg}/20)`); }
+      else if (avg >= 12) { score += 7; }
+      else if (avg < 10) { score -= 18; reasoning.push("faiblesse dans une matière clé du métier"); }
+    }
+  }
+
+  // 3. MBTI fit
+  if (ctx.mbtiType && c.mbtiTypes.length > 0) {
+    if (c.mbtiTypes.includes(ctx.mbtiType)) {
+      score += 25;
+      reasoning.push(`compatible avec votre profil MBTI ${ctx.mbtiType}`);
+    } else {
+      score -= 12; // mismatch penalty (not fatal — interest can still win)
+    }
+  }
+
+  // 4. Gardner intelligence fit
+  if (ctx.topIntelligence && c.intelligence.includes(ctx.topIntelligence)) {
+    score += 18;
+    reasoning.push(`fait appel à l'intelligence dominante (${ctx.topIntelligence.toLowerCase()})`);
+  }
+
+  // 5. IQ tier
+  if (ctx.iqScore != null) {
+    const gap = ctx.iqScore - c.minIqScore;
+    if (gap >= 0) score += Math.min(10, Math.round(gap / 3));
+    else score -= Math.min(25, Math.abs(gap)); // hard penalty for under-IQ
+  }
+
+  // 6. Tablet "expressed preference"
+  if (ctx.tabletTop === c.id) { score += 12; reasoning.push("choix exprimé sur la tablette EDURA Test"); }
+  else if (ctx.tabletLiked.has(c.id)) { score += 6; reasoning.push("apprécié(e) sur la tablette"); }
+
+  // 7. Teacher observation tags
+  if (ctx.topIntelligence && ctx.observationTags.has(ctx.topIntelligence)) {
+    score += 5;
+  }
+
+  return { score, reasoning };
+}
 
 export type ScientificReport = {
   meta: {
@@ -113,6 +338,7 @@ export type ScientificReport = {
       title: string;
       filiere: string;
       requiredStudies: string;
+      reasoning?: string;
     }[];
     universitySuggestions: string[];
   };
@@ -314,42 +540,64 @@ export function generateScientificReport(input: ReportInput): ScientificReport {
       : "STABLE";
 
   // ─── 2. Compute multiple intelligences ───────────────────────────
+  // PRIORITY 1: if the student took the EDURA Test on the tablet, use those
+  // direct intelligence scores (they're far more reliable than grade-based estimation).
+  const tabletScores = input.testResultIntelligenceScores;
+  const useTabletScores =
+    !!tabletScores && Object.values(tabletScores).some((v) => typeof v === "number" && v > 0);
+
   // Base score from grade performance per subject domain
   const intelligenceScores = new Map<IntelligenceType, number>();
   const intelligenceCounts = new Map<IntelligenceType, number>();
 
-  // Initialize all intelligences to a baseline
-  (Object.keys(INTELLIGENCE_LABELS) as IntelligenceType[]).forEach((i) => {
-    intelligenceScores.set(i, 30); // baseline 30%
-    intelligenceCounts.set(i, 1);
-  });
-
-  // Boost based on subject performance
-  subjectAverages.forEach((s) => {
-    const code = grades.find((g) => g.subject.name === s.name)?.subject.code;
-    if (!code) return;
-    const intelligences = SUBJECT_TO_INTELLIGENCE[code] ?? [];
-    intelligences.forEach((i) => {
-      const boost = (s.gpa / 20) * 70; // 0..70 contribution
-      intelligenceScores.set(
-        i,
-        (intelligenceScores.get(i) ?? 0) + boost,
-      );
-      intelligenceCounts.set(i, (intelligenceCounts.get(i) ?? 0) + 1);
+  if (useTabletScores) {
+    // Tablet scores are already 0-100 percentages
+    (Object.keys(INTELLIGENCE_LABELS) as IntelligenceType[]).forEach((i) => {
+      intelligenceScores.set(i, 0);
+      intelligenceCounts.set(i, 1);
     });
-  });
-
-  // Boost from teacher observations tags
-  observations.forEach((o) => {
-    if (!o.intelligenceTags) return;
-    splitCsv(o.intelligenceTags).forEach((tag) => {
-      const t = tag.toUpperCase() as IntelligenceType;
-      if (INTELLIGENCE_LABELS[t]) {
-        intelligenceScores.set(t, (intelligenceScores.get(t) ?? 0) + 15);
-        intelligenceCounts.set(t, (intelligenceCounts.get(t) ?? 0) + 1);
+    for (const [tabletKey, val] of Object.entries(tabletScores!)) {
+      const internal = TABLET_TO_INTERNAL[tabletKey];
+      if (internal && typeof val === "number") {
+        intelligenceScores.set(internal, val);
       }
+    }
+  } else {
+    // Initialize all intelligences to a baseline (grade-based fallback)
+    (Object.keys(INTELLIGENCE_LABELS) as IntelligenceType[]).forEach((i) => {
+      intelligenceScores.set(i, 30); // baseline 30%
+      intelligenceCounts.set(i, 1);
     });
-  });
+  }
+
+  if (!useTabletScores) {
+    // Boost based on subject performance (only when we don't have direct tablet scores)
+    subjectAverages.forEach((s) => {
+      const code = grades.find((g) => g.subject.name === s.name)?.subject.code;
+      if (!code) return;
+      const intelligences = SUBJECT_TO_INTELLIGENCE[code] ?? [];
+      intelligences.forEach((i) => {
+        const boost = (s.gpa / 20) * 70; // 0..70 contribution
+        intelligenceScores.set(
+          i,
+          (intelligenceScores.get(i) ?? 0) + boost,
+        );
+        intelligenceCounts.set(i, (intelligenceCounts.get(i) ?? 0) + 1);
+      });
+    });
+
+    // Boost from teacher observations tags
+    observations.forEach((o) => {
+      if (!o.intelligenceTags) return;
+      splitCsv(o.intelligenceTags).forEach((tag) => {
+        const t = tag.toUpperCase() as IntelligenceType;
+        if (INTELLIGENCE_LABELS[t]) {
+          intelligenceScores.set(t, (intelligenceScores.get(t) ?? 0) + 15);
+          intelligenceCounts.set(t, (intelligenceCounts.get(t) ?? 0) + 1);
+        }
+      });
+    });
+  }
 
   // Normalize (average across boosts)
   const rawIntelligences: { type: IntelligenceType; label: string; score: number }[] = [];
@@ -484,11 +732,53 @@ export function generateScientificReport(input: ReportInput): ScientificReport {
   const finalFilieres =
     filteredFilieres.length > 0 ? filteredFilieres : recommendedFilieres;
 
-  // ─── 6. Career suggestions from top filière ───────────────────────
-  const careerSuggestions = top.profile.careers.slice(0, 4).map((c) => ({
+  // ─── 6. Unified career suggestions — combines ALL signals ────────────
+  //     filière strength + MBTI fit + Gardner intelligence + IQ tier +
+  //     tablet swipe preferences + teacher observations
+  const subjectAvgByCode = new Map<string, number>();
+  subjectAverages.forEach((s) => {
+    const code = grades.find((g) => g.subject.name === s.name)?.subject.code;
+    if (code) subjectAvgByCode.set(code, s.gpa);
+  });
+
+  const observationTagsSet = new Set<IntelligenceType>();
+  observations.forEach((o) => {
+    if (!o.intelligenceTags) return;
+    splitCsv(o.intelligenceTags).forEach((tag) => {
+      const t = tag.toUpperCase() as IntelligenceType;
+      if (INTELLIGENCE_LABELS[t]) observationTagsSet.add(t);
+    });
+  });
+
+  const careerCtx = {
+    bestSubjects,
+    weakSubjects,
+    subjectAvgByCode,
+    mbtiType: input.mbtiType ?? null,
+    topIntelligence: intelligencesScaled[0]?.type ?? null,
+    iqScore: student.iqScore ?? null,
+    tabletLiked: new Set(input.tabletCareerLiked ?? []),
+    tabletTop: input.tabletCareerTopMatch ?? null,
+    observationTags: observationTagsSet,
+    topFiliereName: top.profile.name,
+  };
+
+  const scoredCareers = CAREER_CATALOG.map((c) => {
+    const { score, reasoning } = scoreCareerFor(c, careerCtx);
+    return { ...c, score, reasoning };
+  }).sort((a, b) => b.score - a.score);
+
+  // Take top 4, but ensure we always include the top filière's best academic match
+  // (so the academic signal is never drowned by a swipe-only preference).
+  const topCareers = scoredCareers.slice(0, 4);
+
+  const careerSuggestions = topCareers.map((c) => ({
     title: c.title,
-    filiere: top.profile.name,
+    filiere: c.filiere,
     requiredStudies: c.studies,
+    reasoning: c.reasoning.length > 0
+      ? c.reasoning.slice(0, 3).join(" · ")
+      : "Profil global compatible",
   }));
 
   const universitySuggestions = top.profile.universities;

@@ -55,6 +55,66 @@ type RawObs = {
   createdAt: string;
 };
 
+// Data coming from the tablet's `test_results` table (most recent attempt)
+type TabletTestResult = {
+  mbtiType: string | null;
+  mbtiScores: { E?: number; I?: number; S?: number; N?: number; T?: number; F?: number; J?: number; P?: number } | null;
+  iqScore: number | null;
+  iqLevel: string | null;
+  iqPercentile: number | null;
+  dominantIntelligence: string | null;
+  intelligenceScores: Record<string, number> | null;
+  careerLiked: string[] | null;
+  careerTopMatch: string | null;
+  submittedAt: string;
+  attemptCount: number;
+};
+
+// Carrière id → label FR (mirror of the tablet's careers.ts)
+const CAREER_FR: Record<string, { label: string; emoji: string }> = {
+  doctor: { label: "Médecin", emoji: "🩺" },
+  engineer: { label: "Ingénieur(e)", emoji: "⚙️" },
+  teacher: { label: "Enseignant(e)", emoji: "📚" },
+  artist: { label: "Artiste / Designer", emoji: "🎨" },
+  lawyer: { label: "Avocat(e)", emoji: "⚖️" },
+  pilot: { label: "Pilote", emoji: "✈️" },
+  chef: { label: "Chef cuisinier", emoji: "👨‍🍳" },
+  programmer: { label: "Développeur(se) logiciel", emoji: "💻" },
+  psychologist: { label: "Psychologue", emoji: "🧠" },
+  architect: { label: "Architecte", emoji: "🏛️" },
+  journalist: { label: "Journaliste", emoji: "📰" },
+  scientist: { label: "Scientifique", emoji: "🔬" },
+  entrepreneur: { label: "Entrepreneur(e)", emoji: "🚀" },
+  musician: { label: "Musicien(ne)", emoji: "🎸" },
+  nurse: { label: "Infirmier(ère)", emoji: "🏥" },
+  athlete: { label: "Athlète professionnel(le)", emoji: "🏅" },
+  accountant: { label: "Comptable", emoji: "📊" },
+  biologist: { label: "Biologiste", emoji: "🌿" },
+  social_worker: { label: "Travailleur(se) social(e)", emoji: "🤝" },
+  marketer: { label: "Spécialiste en marketing", emoji: "📣" },
+  pharmacist: { label: "Pharmacien(ne)", emoji: "💊" },
+  writer: { label: "Auteur(e) / Écrivain(e)", emoji: "✍️" },
+  veterinarian: { label: "Vétérinaire", emoji: "🐾" },
+  data_analyst: { label: "Analyste de données", emoji: "📈" },
+  translator: { label: "Traducteur(trice)", emoji: "🌐" },
+  policeman: { label: "Policier(ère)", emoji: "👮" },
+  filmmaker: { label: "Cinéaste", emoji: "🎬" },
+  agronomist: { label: "Agronome", emoji: "🌾" },
+  civil_servant: { label: "Fonctionnaire", emoji: "🏛️" },
+  electrician: { label: "Électricien(ne)", emoji: "⚡" },
+};
+
+const INTEL_FR: Record<string, { label: string; emoji: string }> = {
+  Linguistic: { label: "Linguistique", emoji: "📝" },
+  "Logical-Mathematical": { label: "Logico-mathématique", emoji: "🔢" },
+  Spatial: { label: "Visuo-spatial", emoji: "🎨" },
+  Musical: { label: "Musical", emoji: "🎵" },
+  "Bodily-Kinesthetic": { label: "Corporel-kinesthésique", emoji: "⚽" },
+  Interpersonal: { label: "Interpersonnel", emoji: "🤝" },
+  Intrapersonal: { label: "Intrapersonnel", emoji: "🧘" },
+  Naturalist: { label: "Naturaliste", emoji: "🌿" },
+};
+
 const INTELLIGENCE_COLORS = [
   "#16a34a", // green
   "#0891b2", // cyan
@@ -71,6 +131,7 @@ export function ReportClient({
   observationsRaw,
   subjects,
   school,
+  testResult,
 }: {
   student: {
     id: string;
@@ -92,6 +153,7 @@ export function ReportClient({
   observationsRaw: RawObs[];
   subjects: { id: string; name: string }[];
   school: { name: string; wilaya: string; director: string };
+  testResult: TabletTestResult | null;
 }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [obsOpen, setObsOpen] = useState(false);
@@ -798,6 +860,9 @@ export function ReportClient({
           </p>
         </InterpretationBox>
 
+        {/* ─── NEW: EDURA Test result — live data from the tablet ─── */}
+        {testResult && <EduraTestSection result={testResult} />}
+
         {/* ─── Section 3-bis : MBTI PERSONALITY (cyan) ─── */}
         <MBTISection mbtiType={student.mbtiType} mbtiTestDate={student.mbtiTestDate} />
 
@@ -849,10 +914,20 @@ export function ReportClient({
                     key={i}
                     className="p-2.5 rounded-lg bg-white border border-purple-200"
                   >
-                    <div className="font-semibold text-sm">{c.title}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      {c.requiredStudies}
+                    <div className="flex items-baseline justify-between gap-2">
+                      <div className="font-semibold text-sm">{c.title}</div>
+                      {i === 0 && (
+                        <Badge className="bg-purple-600 text-white text-[9px] tracking-wide">
+                          TOP MATCH
+                        </Badge>
+                      )}
                     </div>
+                    <div className="text-xs text-slate-500 mt-0.5">{c.requiredStudies}</div>
+                    {c.reasoning && (
+                      <div className="text-[10px] text-purple-700 mt-1 italic">
+                        ✓ {c.reasoning}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1120,5 +1195,199 @@ function InterpretationBox({
         </div>
       </div>
     </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// EDURA Test section — auto-populated live data from the tablet test
+// ──────────────────────────────────────────────────────────────────────
+
+function EduraTestSection({ result }: { result: TabletTestResult }) {
+  const career = result.careerTopMatch ? CAREER_FR[result.careerTopMatch] : null;
+  const intel = result.dominantIntelligence ? INTEL_FR[result.dominantIntelligence] : null;
+
+  const sortedIntelligences = result.intelligenceScores
+    ? Object.entries(result.intelligenceScores).sort(([, a], [, b]) => b - a)
+    : [];
+
+  const dim = (a: string, b: string) => {
+    const aS = (result.mbtiScores?.[a as keyof typeof result.mbtiScores] as number) ?? 0;
+    const bS = (result.mbtiScores?.[b as keyof typeof result.mbtiScores] as number) ?? 0;
+    const total = aS + bS || 1;
+    return { aS, bS, aPct: Math.round((aS / total) * 100) };
+  };
+
+  return (
+    <Card className="overflow-hidden border-2 border-indigo-300">
+      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-full bg-white/30 grid place-items-center text-sm font-bold">
+            ⚡
+          </div>
+          <Sparkles className="w-5 h-5" />
+          <span className="font-bold tracking-wide text-sm">
+            RÉSULTATS EDURA TEST (Tablette)
+          </span>
+        </div>
+        <div className="text-xs opacity-90 flex items-center gap-2">
+          <Badge className="bg-white/20 text-white border-0 text-[10px]">
+            Tentative #{result.attemptCount}
+          </Badge>
+          <span>{new Date(result.submittedAt).toLocaleDateString("fr-FR")}</span>
+        </div>
+      </div>
+
+      <CardContent className="p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* MBTI dimension breakdown */}
+        <div>
+          <div className="text-[10px] uppercase font-bold tracking-wide text-indigo-700 mb-2">
+            🧩 Personnalité MBTI
+          </div>
+          <div className="text-3xl font-extrabold text-indigo-700 tracking-widest mb-3">
+            {result.mbtiType ?? "—"}
+          </div>
+          <div className="space-y-2">
+            {[
+              ["E", "I"],
+              ["S", "N"],
+              ["T", "F"],
+              ["J", "P"],
+            ].map(([a, b]) => {
+              const { aS, bS, aPct } = dim(a, b);
+              return (
+                <div key={a + b} className="flex items-center gap-2 text-xs">
+                  <span className="w-5 font-bold text-indigo-700">{a}</span>
+                  <span className="w-3 text-right tabular-nums text-slate-500">{aS}</span>
+                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-500" style={{ width: `${aPct}%` }} />
+                  </div>
+                  <span className="w-3 tabular-nums text-slate-500">{bS}</span>
+                  <span className="w-5 font-bold text-violet-700 text-right">{b}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* IQ */}
+        <div>
+          <div className="text-[10px] uppercase font-bold tracking-wide text-indigo-700 mb-2">
+            🧠 Quotient intellectuel
+          </div>
+          <div className="text-4xl font-extrabold text-pink-600 mb-1">
+            {result.iqScore ?? "—"}
+          </div>
+          <div className="text-sm font-semibold text-slate-700">
+            {result.iqLevel ?? ""}
+          </div>
+          {result.iqPercentile != null && (
+            <div className="text-xs text-slate-500 mt-1">
+              Top {100 - result.iqPercentile}% des élèves testés
+            </div>
+          )}
+          <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-rose-400 via-amber-400 to-emerald-500"
+              style={{
+                width: `${Math.min(((result.iqScore ?? 70) - 70) / 75 * 100, 100)}%`,
+              }}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+            <span>70</span>
+            <span>100</span>
+            <span>130+</span>
+          </div>
+        </div>
+
+        {/* Career match */}
+        <div>
+          <div className="text-[10px] uppercase font-bold tracking-wide text-indigo-700 mb-2">
+            💼 Orientation
+          </div>
+          {career ? (
+            <>
+              <div className="text-3xl mb-1">{career.emoji}</div>
+              <div className="text-base font-bold text-slate-900">{career.label}</div>
+              <div className="text-[11px] text-slate-500 mt-0.5">Préférence exprimée par l&apos;élève</div>
+              <div className="text-[10px] text-amber-700 mt-1 italic">
+                ⚠️ Voir la <strong>Section 4</strong> pour la recommandation algorithmique officielle (basée sur notes + MBTI + intelligences + QI).
+              </div>
+            </>
+          ) : (
+            <div className="text-sm text-muted-foreground">Aucun choix exprimé</div>
+          )}
+          {Array.isArray(result.careerLiked) && result.careerLiked.length > 0 && (
+            <div className="mt-3">
+              <div className="text-[10px] uppercase font-bold tracking-wide text-slate-500 mb-1">
+                Également appréciés ({result.careerLiked.length})
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {result.careerLiked.slice(0, 6).map((id) => (
+                  <Badge
+                    key={id}
+                    variant="secondary"
+                    className="text-[10px] bg-indigo-50 text-indigo-700"
+                  >
+                    {CAREER_FR[id]?.emoji ?? ""} {CAREER_FR[id]?.label ?? id}
+                  </Badge>
+                ))}
+                {result.careerLiked.length > 6 && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    +{result.careerLiked.length - 6}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Full 8-intelligence breakdown */}
+        {sortedIntelligences.length > 0 && (
+          <div className="md:col-span-3">
+            <div className="text-[10px] uppercase font-bold tracking-wide text-indigo-700 mb-2 mt-2">
+              ⭐ Profil des 8 intelligences (Howard Gardner)
+            </div>
+            {intel && (
+              <div className="mb-3 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-1.5">
+                <span className="text-lg">{intel.emoji}</span>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-emerald-700">
+                    Dominante :
+                  </span>{" "}
+                  <span className="font-bold text-emerald-900">{intel.label}</span>
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5">
+              {sortedIntelligences.map(([key, score], idx) => {
+                const meta = INTEL_FR[key] ?? { label: key, emoji: "❓" };
+                return (
+                  <div key={key} className="flex items-center gap-2 text-xs">
+                    <span className="w-6 text-center">{meta.emoji}</span>
+                    <span className="flex-1 text-slate-700">{meta.label}</span>
+                    <div className="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={"h-full " + (idx === 0 ? "bg-emerald-500" : "bg-indigo-400")}
+                        style={{ width: `${score}%` }}
+                      />
+                    </div>
+                    <span className="w-10 tabular-nums text-right font-semibold text-slate-700">
+                      {score}%
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+
+      <div className="px-5 py-2 border-t border-indigo-100 bg-indigo-50/50 text-[10px] text-indigo-700 flex items-center gap-2">
+        <Info className="w-3 h-3" />
+        Données provenant de l&apos;application <strong>EDURA Test</strong> installée sur les tablettes.
+        Mises à jour à chaque ouverture de la page.
+      </div>
+    </Card>
   );
 }

@@ -13,6 +13,11 @@ const createStudentSchema = z.object({
   classId: z.string().optional().nullable(),
   parentName: z.string().max(160).optional().nullable(),
   parentPhone: z.string().max(40).optional().nullable(),
+  birthDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format attendu : AAAA-MM-JJ")
+    .optional()
+    .nullable(),
 });
 
 export async function createStudent(formData: FormData) {
@@ -26,16 +31,56 @@ export async function createStudent(formData: FormData) {
     classId: formData.get("classId") || null,
     parentName: formData.get("parentName") || null,
     parentPhone: formData.get("parentPhone") || null,
+    birthDate: formData.get("birthDate") || null,
   });
 
   if (!parsed.success) {
     return { ok: false as const, error: "Données invalides" };
   }
 
+  const { birthDate, ...rest } = parsed.data;
+
   await prisma.student.create({
     data: {
-      ...parsed.data,
+      ...rest,
+      birthDate: birthDate ? new Date(birthDate + "T00:00:00Z") : null,
       schoolId: session.schoolId, // ← multi-tenant scope
+    },
+  });
+
+  revalidatePath("/app/students");
+  return { ok: true as const };
+}
+
+// ── Update a single student's birthday (used by the inline editor in the list)
+const birthdayInput = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Format attendu : AAAA-MM-JJ")
+  .or(z.literal(""))
+  .nullable();
+
+export async function updateStudentBirthday(studentId: string, ymd: string | null) {
+  const session = await requireSession();
+
+  const parsed = birthdayInput.safeParse(ymd ?? "");
+  if (!parsed.success) {
+    return { ok: false as const, error: "Date invalide" };
+  }
+
+  // Safety: only allow updating students within this teacher's school
+  const student = await prisma.student.findFirst({
+    where: { id: studentId, schoolId: session.schoolId },
+    select: { id: true },
+  });
+  if (!student) {
+    return { ok: false as const, error: "Élève introuvable" };
+  }
+
+  await prisma.student.update({
+    where: { id: studentId },
+    data: {
+      birthDate: ymd ? new Date(ymd + "T00:00:00Z") : null,
+      updatedAt: new Date(),
     },
   });
 

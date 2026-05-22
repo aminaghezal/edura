@@ -489,12 +489,54 @@ function GpaSparkline({ data, width = 200, height = 60 }: {
 // Main PDF component
 // ──────────────────────────────────────────────────────────────────────
 
+export type TabletTestResultPdf = {
+  mbtiType: string | null;
+  mbtiScores: { E?: number; I?: number; S?: number; N?: number; T?: number; F?: number; J?: number; P?: number } | null;
+  iqScore: number | null;
+  iqLevel: string | null;
+  iqPercentile: number | null;
+  dominantIntelligence: string | null;
+  intelligenceScores: Record<string, number> | null;
+  careerLiked: string[] | null;
+  careerTopMatch: string | null;
+  submittedAt: string;
+};
+
 export type ScientificPdfProps = {
   report: ScientificReport;
   mbti: MBTIProfile | null;
   photoUrl?: string | null;
   school: { name: string; wilaya: string; director: string };
   year: string;
+  testResult?: TabletTestResultPdf | null;
+};
+
+// Career id → French label (mirror of the tablet's careers.ts)
+const CAREER_FR_PDF: Record<string, string> = {
+  doctor: "Medecin", engineer: "Ingenieur(e)", teacher: "Enseignant(e)",
+  artist: "Artiste / Designer", lawyer: "Avocat(e)", pilot: "Pilote",
+  chef: "Chef cuisinier", programmer: "Developpeur(se) logiciel",
+  psychologist: "Psychologue", architect: "Architecte",
+  journalist: "Journaliste", scientist: "Scientifique", entrepreneur: "Entrepreneur(e)",
+  musician: "Musicien(ne)", nurse: "Infirmier(ere)",
+  athlete: "Athlete professionnel(le)", accountant: "Comptable",
+  biologist: "Biologiste", social_worker: "Travailleur(se) social(e)",
+  marketer: "Specialiste en marketing", pharmacist: "Pharmacien(ne)",
+  writer: "Auteur(e) / Ecrivain(e)", veterinarian: "Veterinaire",
+  data_analyst: "Analyste de donnees", translator: "Traducteur(trice)",
+  policeman: "Policier(ere)", filmmaker: "Cineaste", agronomist: "Agronome",
+  civil_servant: "Fonctionnaire", electrician: "Electricien(ne)",
+};
+
+const INTEL_FR_PDF: Record<string, string> = {
+  Linguistic: "Linguistique",
+  "Logical-Mathematical": "Logico-mathematique",
+  Spatial: "Visuo-spatial",
+  Musical: "Musical",
+  "Bodily-Kinesthetic": "Corporel-kinesthesique",
+  Interpersonal: "Interpersonnel",
+  Intrapersonal: "Intrapersonnel",
+  Naturalist: "Naturaliste",
 };
 
 export function ScientificReportPdf({
@@ -503,6 +545,7 @@ export function ScientificReportPdf({
   photoUrl,
   school,
   year,
+  testResult,
 }: ScientificPdfProps) {
   return (
     <Document>
@@ -876,11 +919,132 @@ export function ScientificReportPdf({
       </Page>
 
       {/* ═══════════════════════════════════════════════════════════
+         PAGE 2-BIS — RESULTATS EDURA TEST (tablette) — only if data exists
+         ═══════════════════════════════════════════════════════════ */}
+      {testResult && (
+        <Page size="A4" style={styles.page}>
+          <SectionBanner
+            n={4}
+            title="RESULTATS EDURA TEST (TABLETTE)"
+            titleAr="نتائج اختبار إيدورا"
+            color="#6366F1"
+          />
+
+          <View style={{ marginTop: 8, padding: 8, backgroundColor: "#EEF2FF", borderRadius: 6, borderLeftWidth: 3, borderLeftColor: "#6366F1" }}>
+            <Text style={[styles.textSmall, { color: "#3730A3" }]}>
+              Donnees collectees lors de l&apos;evaluation realisee par l&apos;eleve sur l&apos;application EDURA Test
+              (tablette) le {new Date(testResult.submittedAt).toLocaleDateString("fr-FR")}.
+            </Text>
+          </View>
+
+          {/* MBTI dimension breakdown + IQ */}
+          <View style={[styles.row, { marginTop: 10 }]}>
+            <View style={[styles.twoCol, { backgroundColor: "#EEF2FF", borderRadius: 6, padding: 10, borderWidth: 1, borderColor: "#C7D2FE" }]}>
+              <Text style={[styles.subheading, { color: "#4338CA" }]}>Personnalite MBTI</Text>
+              <Text style={{ fontSize: 32, fontWeight: 700, color: "#4338CA", letterSpacing: 3, textAlign: "center", marginVertical: 6 }}>
+                {testResult.mbtiType ?? "—"}
+              </Text>
+              {testResult.mbtiScores && (
+                <View>
+                  {[["E","I"],["S","N"],["T","F"],["J","P"]].map(([a,b]) => {
+                    const aS = (testResult.mbtiScores as any)?.[a] ?? 0;
+                    const bS = (testResult.mbtiScores as any)?.[b] ?? 0;
+                    const total = aS + bS || 1;
+                    const aPct = Math.round((aS / total) * 100);
+                    return (
+                      <View key={a+b} style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                        <Text style={{ fontSize: 8, fontWeight: 700, color: "#4338CA", width: 14 }}>{a}</Text>
+                        <Text style={{ fontSize: 8, color: COLORS.muted, width: 14, textAlign: "right" }}>{aS}</Text>
+                        <View style={{ flex: 1, height: 4, backgroundColor: "#E0E7FF", borderRadius: 2, marginHorizontal: 4, overflow: "hidden" }}>
+                          <View style={{ height: 4, backgroundColor: "#6366F1", width: `${aPct}%` }} />
+                        </View>
+                        <Text style={{ fontSize: 8, color: COLORS.muted, width: 14 }}>{bS}</Text>
+                        <Text style={{ fontSize: 8, fontWeight: 700, color: "#7C3AED", width: 14, textAlign: "right" }}>{b}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+
+            <View style={[styles.col, { backgroundColor: "#FDF2F8", borderRadius: 6, padding: 10, borderWidth: 1, borderColor: "#FBCFE8" }]}>
+              <Text style={[styles.subheading, { color: "#BE185D" }]}>Quotient intellectuel</Text>
+              <Text style={{ fontSize: 36, fontWeight: 700, color: "#BE185D", textAlign: "center", marginVertical: 4 }}>
+                {testResult.iqScore ?? "—"}
+              </Text>
+              <Text style={[styles.text, { textAlign: "center", fontWeight: 700 }]}>
+                {testResult.iqLevel ?? ""}
+              </Text>
+              {testResult.iqPercentile != null && (
+                <Text style={[styles.textSmall, { textAlign: "center", color: COLORS.muted, marginTop: 2 }]}>
+                  Top {100 - testResult.iqPercentile}% des eleves testes
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Intelligences (Gardner) */}
+          {testResult.intelligenceScores && Object.keys(testResult.intelligenceScores).length > 0 && (
+            <View style={{ marginTop: 12, padding: 10, backgroundColor: "#F0FDFA", borderRadius: 6, borderWidth: 1, borderColor: "#5EEAD4" }}>
+              <Text style={[styles.subheading, { color: "#0F766E" }]}>
+                Profil des 8 intelligences (Howard Gardner)
+              </Text>
+              {testResult.dominantIntelligence && (
+                <Text style={[styles.textSmall, { color: "#0F766E", marginBottom: 6, fontWeight: 700 }]}>
+                  Dominante : {INTEL_FR_PDF[testResult.dominantIntelligence] ?? testResult.dominantIntelligence}
+                </Text>
+              )}
+              {Object.entries(testResult.intelligenceScores)
+                .sort(([, a], [, b]) => (b as number) - (a as number))
+                .map(([key, score], idx) => (
+                  <View key={key} style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
+                    <Text style={{ fontSize: 8, color: COLORS.text, width: 130 }}>
+                      {INTEL_FR_PDF[key] ?? key}
+                    </Text>
+                    <View style={{ flex: 1, height: 5, backgroundColor: "#CCFBF1", borderRadius: 2, marginHorizontal: 4, overflow: "hidden" }}>
+                      <View style={{ height: 5, backgroundColor: idx === 0 ? "#14B8A6" : "#5EEAD4", width: `${score}%` }} />
+                    </View>
+                    <Text style={{ fontSize: 8, fontWeight: 700, color: "#0F766E", width: 30, textAlign: "right" }}>{score}%</Text>
+                  </View>
+                ))}
+            </View>
+          )}
+
+          {/* Career preferences */}
+          <View style={{ marginTop: 12, padding: 10, backgroundColor: "#FFFBEB", borderRadius: 6, borderWidth: 1, borderColor: "#FCD34D" }}>
+            <Text style={[styles.subheading, { color: "#92400E" }]}>
+              Preferences professionnelles exprimees
+            </Text>
+            {testResult.careerTopMatch && (
+              <Text style={[styles.text, { fontWeight: 700, marginVertical: 2 }]}>
+                Metier prefere : {CAREER_FR_PDF[testResult.careerTopMatch] ?? testResult.careerTopMatch}
+              </Text>
+            )}
+            {Array.isArray(testResult.careerLiked) && testResult.careerLiked.length > 0 && (
+              <Text style={[styles.textSmall, { color: COLORS.muted }]}>
+                Egalement apprecies ({testResult.careerLiked.length}) : {testResult.careerLiked.slice(0, 8).map((id) => CAREER_FR_PDF[id] ?? id).join(", ")}
+                {testResult.careerLiked.length > 8 ? "…" : ""}
+              </Text>
+            )}
+            <Text style={[styles.textSmall, { fontStyle: "italic", color: "#92400E", marginTop: 6 }]}>
+              Note : ces preferences sont subjectives. La recommandation officielle d&apos;orientation
+              (section &quot;Prediction et Avenir&quot;) combine ces preferences avec les notes,
+              le MBTI, le QI et les intelligences pour proposer le meilleur metier.
+            </Text>
+          </View>
+
+          <Text style={styles.footer}>
+            Page 3/6 — Donnees EDURA Test — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+          </Text>
+        </Page>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
          PAGE 3 — MBTI PERSONALITY PROFILE
          ═══════════════════════════════════════════════════════════ */}
       <Page size="A4" style={styles.page}>
         <SectionBanner
-          n={4}
+          n={5}
           title="PROFIL DE PERSONNALITE (MBTI)"
           titleAr="نوع الشخصية"
           color="#06B6D4"
@@ -1300,8 +1464,24 @@ export function ScientificReportPdf({
           </View>
         </View>
 
+        {/* ── Vision photo: EDURA Institution building (the future) ── */}
+        <View style={{ marginTop: 14, alignItems: "center" }}>
+          <Image
+            src="/edura-institution.png"
+            style={{
+              width: "100%",
+              maxHeight: 240,
+              borderRadius: 6,
+              objectFit: "cover",
+            }}
+          />
+          <Text style={{ fontSize: 8, color: COLORS.muted, marginTop: 4, fontStyle: "italic", textAlign: "center" }}>
+            Vue d&apos;artiste — Future Institution EDURA, ouverte aux talents algeriens.
+          </Text>
+        </View>
+
         <Text style={styles.footer}>
-          Page 5/5 — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
+          Page finale — Document genere par EDURA — {new Date(report.meta.generatedAt).toLocaleDateString("fr-FR")}
         </Text>
       </Page>
     </Document>

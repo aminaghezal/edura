@@ -6,6 +6,19 @@ import { generateScientificReport } from "@/lib/orientation/profile";
 import { generateMBTIProfile } from "@/lib/orientation/mbti";
 import { ScientificReportPdf } from "@/lib/pdf/scientific-report";
 
+type TestResultRow = {
+  mbti_type: string | null;
+  mbti_scores: { E?: number; I?: number; S?: number; N?: number; T?: number; F?: number; J?: number; P?: number } | null;
+  iq_score: number | null;
+  iq_level: string | null;
+  iq_percentile: number | null;
+  dominant_intelligence: string | null;
+  intelligence_scores: Record<string, number> | null;
+  career_liked: string[] | null;
+  career_top_match: string | null;
+  submitted_at: Date;
+};
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -60,6 +73,23 @@ export async function GET(
     new Set(classes.map((c) => c.cycle).filter((c): c is string => !!c)),
   );
 
+  // Pull latest tablet test result via raw SQL
+  let latestTestResult: TestResultRow | null = null;
+  try {
+    const rows = await prisma.$queryRaw<TestResultRow[]>`
+      SELECT tr.*
+      FROM test_results tr
+      JOIN test_sessions ts ON ts.id = tr.session_id
+      WHERE tr.student_id = ${studentId}
+        AND ts.status = 'completed'
+      ORDER BY tr.submitted_at DESC
+      LIMIT 1
+    `;
+    latestTestResult = rows[0] ?? null;
+  } catch (e) {
+    console.warn("[pdf] could not fetch test_results:", e);
+  }
+
   const report = generateScientificReport({
     student: {
       firstName: student.firstName,
@@ -67,7 +97,7 @@ export async function GET(
       firstNameAr: student.firstNameAr,
       lastNameAr: student.lastNameAr,
       className: student.class?.name ?? null,
-      iqScore: student.iqScore,
+      iqScore: latestTestResult?.iq_score ?? student.iqScore,
       learningStyle: student.learningStyle,
       hobbies: student.hobbies,
       interests: student.interests,
@@ -85,9 +115,13 @@ export async function GET(
       intelligenceTags: o.intelligenceTags,
     })),
     availableFilieres,
+    testResultIntelligenceScores: latestTestResult?.intelligence_scores ?? null,
+    mbtiType: latestTestResult?.mbti_type ?? student.mbtiType,
+    tabletCareerLiked: latestTestResult?.career_liked ?? null,
+    tabletCareerTopMatch: latestTestResult?.career_top_match ?? null,
   });
 
-  const mbtiProfile = generateMBTIProfile(student.mbtiType);
+  const mbtiProfile = generateMBTIProfile(latestTestResult?.mbti_type ?? student.mbtiType);
 
   const stream = await renderToStream(
     <ScientificReportPdf
@@ -96,6 +130,22 @@ export async function GET(
       photoUrl={student.photoUrl ?? null}
       school={school ?? { name: "École", wilaya: "", director: "" }}
       year={year?.name ?? "2025-2026"}
+      testResult={
+        latestTestResult
+          ? {
+              mbtiType: latestTestResult.mbti_type,
+              mbtiScores: latestTestResult.mbti_scores,
+              iqScore: latestTestResult.iq_score,
+              iqLevel: latestTestResult.iq_level,
+              iqPercentile: latestTestResult.iq_percentile,
+              dominantIntelligence: latestTestResult.dominant_intelligence,
+              intelligenceScores: latestTestResult.intelligence_scores,
+              careerLiked: latestTestResult.career_liked,
+              careerTopMatch: latestTestResult.career_top_match,
+              submittedAt: latestTestResult.submitted_at.toISOString(),
+            }
+          : null
+      }
     />,
   );
 

@@ -12,7 +12,7 @@ export default async function StudentsPage() {
   const studentWhere = await scopeStudentsBy(session);
   const classIds = await getAccessibleClassIds(session);
 
-  const [students, classes] = await Promise.all([
+  const [studentsRaw, classes] = await Promise.all([
     prisma.student.findMany({
       where: studentWhere,
       include: { class: { select: { name: true } } },
@@ -24,6 +24,12 @@ export default async function StudentsPage() {
       orderBy: { name: "asc" },
     }),
   ]);
+
+  // Serialize DateTime fields for client component (Date objects can't cross the boundary cleanly)
+  const students = studentsRaw.map((s) => ({
+    ...s,
+    birthDate: s.birthDate ? s.birthDate.toISOString().split("T")[0] : null, // YYYY-MM-DD
+  }));
 
   return <StudentsClient students={students} classes={classes} />;
 }
